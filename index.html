@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#163b72">
+  <title>Hayes Parent School Dashboard</title>
+  <style>
+    :root {
+      --navy:#163b72; --navy-2:#0d2b58; --red:#a62126; --blue:#2f6fed;
+      --ink:#172033; --muted:#667085; --line:#dce3ee; --soft:#f2f6fb;
+      --card:#fff; --bg:#edf3f9; --success:#16865c; --warn:#b76b00; --danger:#c23434;
+      --shadow:0 10px 30px rgba(22,59,114,.09); --radius:18px; --text-size:16px;
+    }
+    * { box-sizing:border-box; }
+    html { font-size:var(--text-size); }
+    body { margin:0; min-height:100vh; color:var(--ink); background:var(--bg); font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; }
+    button,input,select,textarea { font:inherit; }
+    button { cursor:pointer; }
+    button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline:3px solid rgba(47,111,237,.35); outline-offset:2px; }
+    .topbar { position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:16px; min-height:78px; padding:13px clamp(16px,4vw,44px); color:#fff; background:linear-gradient(120deg,var(--navy-2),var(--navy) 58%,#24569c); box-shadow:0 6px 20px rgba(13,43,88,.2); }
+    .brand-mark { display:grid; place-items:center; width:48px; height:48px; flex:none; border-radius:15px; font-size:25px; background:#fff; color:var(--navy); box-shadow:inset 0 -4px 0 rgba(166,33,38,.16); }
+    .brand { min-width:0; }
+    .brand h1 { margin:0; font-size:clamp(1.1rem,2.4vw,1.45rem); line-height:1.15; }
+    .brand p { margin:4px 0 0; color:#dce9fb; font-size:.82rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .top-actions { margin-left:auto; display:flex; gap:8px; }
+    .icon-btn { min-height:42px; padding:9px 12px; border:1px solid rgba(255,255,255,.28); border-radius:12px; background:rgba(255,255,255,.1); color:#fff; font-weight:800; }
+    .layout { display:grid; grid-template-columns:220px minmax(0,1fr); max-width:1600px; margin:0 auto; }
+    .nav { position:sticky; top:78px; align-self:start; height:calc(100vh - 78px); padding:22px 14px; border-right:1px solid var(--line); background:rgba(255,255,255,.72); backdrop-filter:blur(14px); }
+    .nav button { position:relative; display:flex; align-items:center; gap:10px; width:100%; padding:12px 13px; margin:3px 0; border:0; border-radius:12px; text-align:left; color:#3b4960; background:transparent; font-weight:700; }
+    .nav button:hover { background:#eaf1fb; }
+    .nav button.active { color:var(--navy); background:#dce9fb; }
+    .nav-icon { width:22px; text-align:center; }
+    .nav-count { margin-left:auto; min-width:23px; padding:3px 6px; border-radius:999px; text-align:center; color:#fff; background:var(--danger); font-size:.66rem; }
+    .school-chip { margin-top:18px; padding:13px; border:1px solid var(--line); border-radius:14px; background:var(--card); color:var(--muted); font-size:.76rem; line-height:1.45; }
+    .school-chip strong { display:block; margin-bottom:4px; color:var(--ink); }
+    main { width:100%; min-width:0; padding:clamp(18px,3vw,34px); }
+    .page { display:none; animation:fade .18s ease; }
+    .page.active { display:block; }
+    @keyframes fade { from { opacity:.35; transform:translateY(4px); } }
+    .page-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:22px; }
+    .page-head h2 { margin:0; font-size:clamp(1.45rem,3vw,2rem); letter-spacing:-.03em; }
+    .page-head p { margin:6px 0 0; color:var(--muted); }
+    .grid { display:grid; gap:16px; }
+    .grid.two { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .grid.three { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .dashboard { grid-template-columns:minmax(0,1.3fr) minmax(290px,.7fr); }
+    .stack { display:grid; gap:16px; align-content:start; }
+    .card { border:1px solid rgba(206,217,232,.9); border-radius:var(--radius); background:var(--card); box-shadow:var(--shadow); }
+    .card-pad { padding:18px; }
+    .card h3 { margin:0; font-size:1rem; }
+    .card-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
+    .card-title p { margin:3px 0 0; color:var(--muted); font-size:.8rem; }
+    .hero { overflow:hidden; padding:22px; color:#fff; background:linear-gradient(130deg,var(--navy-2),var(--navy) 58%,#2e69bb); }
+    .hero-grid { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:18px; align-items:center; }
+    .eyebrow { margin:0 0 8px; color:#d6e6fb; font-size:.78rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+    .hero h2 { margin:0; font-size:clamp(1.45rem,3vw,2.25rem); }
+    .hero p { margin:9px 0 0; max-width:700px; color:#dce9fb; }
+    .date-badge { min-width:112px; padding:15px; border:1px solid rgba(255,255,255,.24); border-radius:18px; text-align:center; background:rgba(255,255,255,.1); }
+    .date-badge .big { display:block; font-size:2rem; font-weight:900; }
+    .date-badge .small { color:#e5effd; font-size:.76rem; text-transform:uppercase; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:42px; padding:9px 14px; border:0; border-radius:11px; color:#fff; background:var(--navy); font-weight:800; text-decoration:none; }
+    .btn:hover { filter:brightness(1.08); }
+    .btn.secondary { border:1px solid #cdd8e6; color:var(--navy); background:#fff; }
+    .btn.soft { color:var(--navy); background:#e7effa; }
+    .btn.danger { color:#a32626; background:#feecec; }
+    .btn.small { min-height:34px; padding:6px 10px; font-size:.76rem; }
+    .btn.wide { width:100%; }
+    .pill { display:inline-flex; align-items:center; gap:5px; padding:5px 9px; border-radius:999px; color:#4b596f; background:#edf2f7; font-size:.69rem; font-weight:850; }
+    .pill.red { color:#ad2929; background:#ffeded; }
+    .pill.gold { color:#925600; background:#fff1d7; }
+    .pill.green { color:#0e744d; background:#e5f7ef; }
+    .pill.blue { color:#2458b5; background:#e7efff; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+    .stat { padding:14px 8px; border-radius:13px; text-align:center; background:#f4f7fb; }
+    .stat strong { display:block; font-size:1.45rem; }
+    .stat span { color:var(--muted); font-size:.68rem; }
+    .stat.alert strong { color:var(--danger); }
+    .empty { padding:20px; border:1px dashed #c8d3e2; border-radius:14px; text-align:center; color:var(--muted); background:#f9fbfd; }
+    .empty strong { display:block; margin-bottom:4px; color:var(--ink); }
+    .compact-list,.activity-list,.schedule-list { display:grid; gap:9px; }
+    .priority-item,.activity-row { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:11px; align-items:center; padding:12px; border:1px solid var(--line); border-left:5px solid var(--class-color,var(--blue)); border-radius:13px; background:#fff; }
+    .priority-number,.student-avatar { display:grid; place-items:center; width:34px; height:34px; border-radius:10px; color:#fff; background:var(--navy); font-weight:900; }
+    .student-avatar.sky { background:var(--red); }
+    .item-main { min-width:0; }
+    .item-main strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .item-main small { display:block; margin-top:3px; color:var(--muted); }
+    .item-main .meta { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
+    .alert-card { position:relative; overflow:hidden; border-color:#f1b7b7; }
+    .alert-card:before { content:""; position:absolute; inset:0 auto 0 0; width:7px; background:var(--danger); }
+    .alert-rule { padding:13px 15px; border-radius:13px; color:#71400a; background:#fff1d7; font-size:.8rem; line-height:1.5; }
+    .connection { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:.76rem; }
+    .connection-dot { width:9px; height:9px; border-radius:50%; background:#98a2b3; }
+    .connection-dot.live { background:var(--success); box-shadow:0 0 0 4px rgba(22,134,92,.12); }
+    .connection-dot.import { background:var(--warn); }
+    .schedule-row { display:grid; grid-template-columns:76px 9px minmax(0,1fr) auto; gap:10px; align-items:center; padding:9px 10px; border-radius:12px; background:#f7f9fc; }
+    .schedule-row .time { color:#52627a; font-size:.73rem; font-weight:800; }
+    .schedule-row .dot { width:9px; height:34px; border-radius:9px; background:var(--class-color,var(--blue)); }
+    .schedule-row strong { display:block; font-size:.86rem; }
+    .schedule-row small { color:var(--muted); }
+    .student-banner { display:flex; align-items:center; gap:14px; padding:17px; border:1px solid var(--line); border-radius:16px; background:linear-gradient(120deg,#fff,#f5f8fc); }
+    .student-banner .student-avatar { width:52px; height:52px; border-radius:15px; font-size:1.25rem; }
+    .student-banner h3 { margin:0; font-size:1.2rem; }
+    .student-banner p { margin:4px 0 0; color:var(--muted); }
+    .student-banner .connection { margin-left:auto; }
+    .grade-table { width:100%; border-collapse:collapse; }
+    .grade-table th,.grade-table td { padding:11px 9px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+    .grade-table th { color:var(--muted); font-size:.72rem; text-transform:uppercase; }
+    .grade-score { color:var(--navy); font-size:1.15rem; font-weight:900; }
+    .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .form-grid .full { grid-column:1/-1; }
+    label { display:grid; gap:6px; color:#475467; font-size:.78rem; font-weight:800; }
+    input,select,textarea { width:100%; min-height:42px; padding:9px 11px; border:1px solid #cbd5e2; border-radius:11px; color:var(--ink); background:#fff; }
+    textarea { min-height:100px; resize:vertical; }
+    .settings-section { padding:18px; border:1px solid var(--line); border-radius:15px; background:#fff; }
+    .settings-section h3 { margin:0 0 12px; }
+    .toggle-row { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:11px 0; border-bottom:1px solid #edf0f4; }
+    .toggle-row:last-child { border-bottom:0; }
+    .toggle-row strong { display:block; }
+    .toggle-row small { color:var(--muted); }
+    .switch { position:relative; width:48px; height:28px; flex:none; }
+    .switch input { position:absolute; opacity:0; }
+    .switch span { position:absolute; inset:0; border-radius:999px; background:#b9c4d2; transition:.2s; }
+    .switch span:after { content:""; position:absolute; width:22px; height:22px; left:3px; top:3px; border-radius:50%; background:#fff; transition:.2s; box-shadow:0 2px 5px rgba(0,0,0,.2); }
+    .switch input:checked + span { background:var(--blue); }
+    .switch input:checked + span:after { transform:translateX(20px); }
+    .privacy-note { padding:11px 13px; border-radius:11px; color:#44556d; background:#eef4fb; font-size:.76rem; line-height:1.45; }
+    .modal-backdrop { position:fixed; inset:0; z-index:50; display:none; place-items:center; padding:20px; background:rgba(7,21,43,.68); }
+    .modal-backdrop.open { display:grid; }
+    .modal { width:min(680px,100%); max-height:92vh; overflow:auto; border-radius:20px; background:#fff; box-shadow:0 30px 80px rgba(0,0,0,.3); }
+    .modal-head { position:sticky; top:0; z-index:2; display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--line); background:#fff; }
+    .modal-head h2 { margin:0; font-size:1.2rem; }
+    .modal-body { padding:20px; }
+    .close-btn { width:38px; height:38px; border:0; border-radius:10px; background:#eef2f7; font-size:1.2rem; }
+    .toast { position:fixed; z-index:80; right:22px; bottom:22px; max-width:390px; padding:13px 16px; border-radius:12px; color:#fff; background:#162b4b; box-shadow:0 14px 30px rgba(0,0,0,.22); opacity:0; transform:translateY(15px); pointer-events:none; transition:.2s; }
+    .toast.show { opacity:1; transform:none; }
+    body.dark { --ink:#eef4ff; --muted:#a8b4c7; --line:#34435a; --card:#172337; --bg:#0e1828; --soft:#172337; --shadow:0 10px 30px rgba(0,0,0,.18); }
+    body.dark .nav,body.dark input,body.dark select,body.dark textarea,body.dark .btn.secondary,body.dark .activity-row,body.dark .priority-item,body.dark .settings-section,body.dark .modal,body.dark .modal-head { color:var(--ink); background:#172337; }
+    body.dark .stat,body.dark .schedule-row,body.dark .empty,body.dark .student-banner { background:#202e43; }
+    body.dark .student-banner { background:linear-gradient(120deg,#172337,#202e43); }
+    body.high-contrast { --ink:#000; --muted:#202020; --line:#111; --bg:#fff; --card:#fff; --navy:#002c6d; --blue:#004fd1; }
+    body.high-contrast .card,body.high-contrast input,body.high-contrast select,body.high-contrast textarea { border-width:2px; }
+    body.large-text { --text-size:19px; }
+    body.dyslexia { font-family:Verdana,Tahoma,Arial,sans-serif; letter-spacing:.02em; word-spacing:.08em; }
+    body.reduced .school-chip,body.reduced .eyebrow { display:none !important; }
+    @media (max-width:1050px) { .dashboard,.grid.three { grid-template-columns:1fr; } .stats { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:780px) {
+      .topbar { min-height:70px; padding:10px 14px; }
+      .brand-mark { width:43px; height:43px; }
+      .top-actions .hide-mobile { display:none; }
+      .layout { display:block; }
+      .nav { position:sticky; top:70px; z-index:18; display:flex; gap:4px; width:100%; height:auto; padding:7px; overflow-x:auto; border-right:0; border-bottom:1px solid var(--line); }
+      .nav button { width:auto; flex:none; margin:0; padding:8px 10px; font-size:.72rem; }
+      .nav-icon { width:auto; }
+      .school-chip { display:none; }
+      main { padding:16px 12px 90px; }
+      .grid.two,.form-grid { grid-template-columns:1fr; }
+      .form-grid .full { grid-column:auto; }
+      .hero-grid { grid-template-columns:1fr; }
+      .date-badge { justify-self:start; }
+      .activity-row,.priority-item { grid-template-columns:auto minmax(0,1fr); }
+      .activity-row > :last-child,.priority-item > :last-child { grid-column:2; justify-self:start; }
+      .student-banner { align-items:flex-start; flex-wrap:wrap; }
+      .student-banner .connection { width:100%; margin-left:66px; }
+      .grade-table { min-width:680px; }
+    }
+    @media print { .topbar,.nav,.no-print,button { display:none !important; } .layout { display:block; } main { padding:0; } .page { display:block !important; page-break-after:always; } .card { box-shadow:none; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand-mark">H</div>
+      <div class="brand"><h1>Hayes Parent School Dashboard</h1><p>Noble · 8th Grade &nbsp;|&nbsp; Sky · 7th Grade · Rawlinson Middle School</p></div>
+      <div class="top-actions">
+        <button class="icon-btn hide-mobile" id="refreshButton">↻ Refresh</button>
+        <button class="icon-btn" id="themeButton" aria-label="Toggle dark mode">☾</button>
+      </div>
+    </header>
+    <div class="layout">
+      <nav class="nav" aria-label="Main navigation">
+        <button class="active" data-page="overview"><span class="nav-icon">⌂</span> Overview</button>
+        <button data-page="missing"><span class="nav-icon">!</span> Missing grades <span class="nav-count" id="navAlertCount" hidden>0</span></button>
+        <button data-page="activity"><span class="nav-icon">☷</span> All activity</button>
+        <button data-page="noble"><span class="nav-icon">N</span> Noble</button>
+        <button data-page="sky"><span class="nav-icon">S</span> Sky</button>
+        <button data-page="settings"><span class="nav-icon">⚙</span> Settings</button>
+        <div class="school-chip"><strong>2026–27 School Year</strong>First day: Aug 10, 2026<br>Last day: May 26, 2027<br><br>Missing-grade check: 3 school days</div>
+      </nav>
+      <main>
+        <section class="page active" id="overview"></section>
+        <section class="page" id="missing"></section>
+        <section class="page" id="activity"></section>
+        <section class="page" id="noble"></section>
+        <section class="page" id="sky"></section>
+        <section class="page" id="settings"></section>
+      </main>
+    </div>
+  </div>
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal"><div class="modal-head"><h2 id="modalTitle">Record grade</h2><button class="close-btn" id="modalClose" aria-label="Close">×</button></div><div class="modal-body" id="modalBody"></div></div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <input type="file" id="importInput" accept="application/json" multiple hidden>
+  <script>
+  (() => {
+    'use strict';
+    const PARENT_KEY='hayes-parent-school-dashboard-v1';
+    const SCHOOL_START='2026-08-10', SCHOOL_END='2027-05-26';
+    const CHILDREN={
+      noble:{name:'Noble',initial:'N',grade:'8th Grade',storageKey:'noble-school-planner-v1',classes:[
+        {id:'pe',period:1,name:'PE 8 / Athletics (Boys)',room:'E101',teacher:'Diaz',start:'08:35',end:'09:20',color:'#2f6fed',goal:85,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'history',period:2,name:'Advanced U.S. History 8',room:'C217',teacher:'Lopez',start:'09:24',end:'10:14',color:'#b65b19',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'spanish',period:3,name:'Spanish I MS',room:'B109',teacher:'Medina',start:'10:18',end:'11:03',color:'#8c4bc0',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'avid',period:4,name:'AVID A HS',room:'B204',teacher:'Reyes',start:'11:07',end:'11:52',color:'#cf3b67',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'algebra',period:5,name:'Advanced MS Algebra I',room:'B216',teacher:'Sosa',start:'11:56',end:'12:51',color:'#16865c',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'science',period:6,name:'Advanced Science 8',room:'B221',teacher:'Herrera',start:'13:29',end:'14:14',color:'#008a9a',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'art',period:7,name:'Art I HS',room:'B121',teacher:'Ramirez',start:'14:18',end:'15:03',color:'#d58a00',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'ela',period:8,name:'Advanced ELA 8',room:'B207',teacher:'Rangel',start:'15:07',end:'15:55',color:'#a62126',goal:90,weights:{homework:20,quiz:20,test:35,project:25}}
+      ]},
+      sky:{name:'Sky',initial:'S',grade:'7th Grade',storageKey:'sky-school-planner-v1',classes:[
+        {id:'band',period:1,name:'Beginner Band',room:'F101',teacher:'Medariaga Santos',start:'08:35',end:'09:20',color:'#2f6fed',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'art',period:2,name:'Art 2 MS',room:'B123',teacher:'Coker',start:'09:24',end:'10:14',color:'#b65b19',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'science',period:3,name:'Advanced Science 7',room:'B218',teacher:'Speelman',start:'10:18',end:'11:03',color:'#8c4bc0',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'ela',period:4,name:'Advanced ELA 7',room:'C221',teacher:'Leigh-Gomez',start:'11:07',end:'11:52',color:'#cf3b67',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'ela5',period:5,name:'Advanced ELA 7',room:'C221',teacher:'Leigh-Gomez',start:'12:30',end:'13:25',color:'#cf3b67',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'history',period:6,name:'Advanced Texas History 7',room:'C213',teacher:'Canter',start:'13:29',end:'14:14',color:'#008a9a',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'math',period:7,name:'Advanced Math 7',room:'B210',teacher:'Pisano',start:'14:18',end:'15:03',color:'#d58a00',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'pe',period:8,name:'PE 7 / Athletics (Boys)',room:'E101',teacher:'Diaz',start:'15:07',end:'15:55',color:'#a62126',goal:85,weights:{homework:20,quiz:20,test:35,project:25}}
+      ]}
+    };
+    const parentDefaults={imports:{},notificationLedger:{},settings:{dark:false,largeText:false,highContrast:false,dyslexia:false,reduced:false,noSchoolDates:[],alertThreshold:3}};
+    let parent=loadParent(), activePage='overview', activityFilter='all', toastTimer;
+
+    function clone(v){return JSON.parse(JSON.stringify(v));}
+    function loadParent(){try{const x=JSON.parse(localStorage.getItem(PARENT_KEY));return {...clone(parentDefaults),...x,settings:{...parentDefaults.settings,...(x?.settings||{})},imports:x?.imports||{},notificationLedger:x?.notificationLedger||{}};}catch(e){return clone(parentDefaults);}}
+    function saveParent(){localStorage.setItem(PARENT_KEY,JSON.stringify(parent));}
+    function parseDate(iso){const [y,m,d]=String(iso).split('-').map(Number);return new Date(y,m-1,d);}
+    function toISO(d){const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;}
+    function localISO(){return toISO(new Date());}
+    function addDays(iso,n){const d=parseDate(iso);d.setDate(d.getDate()+n);return toISO(d);}
+    function fmt(iso,opts={month:'short',day:'numeric'}){return iso?parseDate(iso).toLocaleDateString(undefined,opts):'';}
+    function fmtLong(iso){return fmt(iso,{weekday:'long',month:'long',day:'numeric',year:'numeric'});}
+    function humanTime(t){if(!t)return '';const [h,m]=t.split(':').map(Number);return new Date(2000,0,1,h,m).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});}
+    function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+    function uid(p='id'){return `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`;}
+    function normalize(v=''){return String(v).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
+    function validPlanner(x){return !!x&&Array.isArray(x.classes)&&Array.isArray(x.assignments)&&Array.isArray(x.grades||[]);}
+    function defaultChild(key){const c=CHILDREN[key];return {profile:{name:c.name,grade:c.grade,school:'Rawlinson Middle School'},school:{start:SCHOOL_START,end:SCHOOL_END},classes:clone(c.classes),assignments:[],events:[{id:'first-day',title:`First day of ${c.grade.toLowerCase()}`,type:'school',date:SCHOOL_START,time:'08:30',recurrence:'none',notes:'Rawlinson Middle School'},{id:'last-day',title:'Last day of school',type:'school',date:SCHOOL_END,time:'15:55',recurrence:'none',notes:'Finish strong!'}],grades:[],studySessions:[],routineLog:{},habitLog:{}};}
+    function readChild(key){
+      const info=CHILDREN[key];
+      try{const live=JSON.parse(localStorage.getItem(info.storageKey));if(validPlanner(live))return {data:mergeChild(key,live),source:'live',updated:'Saved in this browser'};}catch(e){}
+      const imported=parent.imports[key];
+      if(imported&&validPlanner(imported.data))return {data:mergeChild(key,imported.data),source:'import',updated:imported.importedAt};
+      return {data:defaultChild(key),source:'default',updated:''};
+    }
+    function mergeChild(key,data){const base=defaultChild(key);return {...base,...data,profile:{...base.profile,...(data.profile||{})},school:{...base.school,...(data.school||{})},classes:Array.isArray(data.classes)&&data.classes.length?data.classes:base.classes,assignments:Array.isArray(data.assignments)?data.assignments:[],events:Array.isArray(data.events)?data.events:base.events,grades:Array.isArray(data.grades)?data.grades:[],studySessions:Array.isArray(data.studySessions)?data.studySessions:[],routineLog:data.routineLog||{},habitLog:data.habitLog||{}};}
+    function datasets(){return Object.fromEntries(Object.keys(CHILDREN).map(k=>[k,readChild(k)]));}
+    function childClass(data,id){return data.classes.find(c=>c.id===id)||{name:'General',color:'#667085',teacher:'',room:'',goal:90,weights:{homework:20,quiz:20,test:35,project:25}};}
+    function connectionHTML(key,record){const label=record.source==='live'?'Connected in this browser':record.source==='import'?`Backup imported ${new Date(record.updated).toLocaleString()}`:'Waiting for planner activity or backup';return `<div class="connection"><span class="connection-dot ${record.source==='live'?'live':record.source==='import'?'import':''}"></span>${esc(label)}</div>`;}
+    function isSchoolDay(iso){const d=parseDate(iso),day=d.getDay();return day!==0&&day!==6&&!parent.settings.noSchoolDates.includes(iso);}
+    function schoolDaysAfter(start,end=localISO()){if(!start||start>=end)return 0;let count=0,cursor=addDays(start,1);while(cursor<=end){if(isSchoolDay(cursor))count++;cursor=addDays(cursor,1);}return count;}
+    function gradeMatches(a,g){if(g.assignmentId&&g.assignmentId===a.id)return true;return g.classId===a.classId&&normalize(g.name)===normalize(a.title);}
+    function hasGrade(a,data){return data.grades.some(g=>gradeMatches(a,g));}
+    function missingGradeItems(dataMap=datasets()){const out=[];for(const [key,record] of Object.entries(dataMap)){for(const a of record.data.assignments){const elapsed=schoolDaysAfter(a.dueDate);if(elapsed>=Number(parent.settings.alertThreshold||3)&&!hasGrade(a,record.data))out.push({key,record,a,elapsed});}}return out.sort((x,y)=>x.a.dueDate.localeCompare(y.a.dueDate));}
+    function overdueItems(dataMap=datasets()){const out=[];for(const [key,record] of Object.entries(dataMap))for(const a of record.data.assignments)if(!a.completed&&a.dueDate<localISO())out.push({key,record,a});return out.sort((x,y)=>x.a.dueDate.localeCompare(y.a.dueDate));}
+    function dueSoon(dataMap=datasets(),days=7){const end=addDays(localISO(),days),out=[];for(const [key,record] of Object.entries(dataMap))for(const a of record.data.assignments)if(!a.completed&&a.dueDate>=localISO()&&a.dueDate<=end)out.push({key,record,a});return out.sort((x,y)=>x.a.dueDate.localeCompare(y.a.dueDate));}
+    function allAssignments(dataMap=datasets()){const out=[];for(const [key,record] of Object.entries(dataMap))for(const a of record.data.assignments)out.push({key,record,a});return out.sort((x,y)=>(x.a.dueDate||'').localeCompare(y.a.dueDate||''));}
+    function upcomingEvents(dataMap=datasets()){const out=[];for(const [key,record] of Object.entries(dataMap))for(const e of record.data.events)if(e.date>=localISO())out.push({key,record,e});return out.sort((x,y)=>(x.e.date+x.e.time).localeCompare(y.e.date+y.e.time));}
+    function completedThisWeek(data){const today=parseDate(localISO()),day=(today.getDay()+6)%7,start=new Date(today);start.setDate(today.getDate()-day);const startISO=toISO(start);return data.assignments.filter(a=>a.completed&&a.completedDate>=startISO&&a.completedDate<=localISO()).length;}
+    function empty(title,text){return `<div class="empty"><strong>${esc(title)}</strong>${esc(text)}</div>`;}
+    function badgeForAssignment(a){if(a.completed)return '<span class="pill green">Completed</span>';if(a.dueDate<localISO())return '<span class="pill red">Overdue</span>';return '<span class="pill blue">Upcoming</span>';}
+    function assignmentRow(item,opts={}){const {key,record,a}=item,c=childClass(record.data,a.classId);return `<div class="activity-row" style="--class-color:${esc(c.color)}"><div class="student-avatar ${key==='sky'?'sky':''}">${CHILDREN[key].initial}</div><div class="item-main"><strong>${esc(a.title)}</strong><small>${esc(CHILDREN[key].name)} · ${esc(c.name)} · due ${fmt(a.dueDate)}${a.estimate?` · ${Number(a.estimate)} min`:''}</small><div class="meta">${badgeForAssignment(a)}<span class="pill">${esc((a.type||'homework').replace(/^./,x=>x.toUpperCase()))}</span>${a.priority==='high'?'<span class="pill gold">High priority</span>':''}</div></div>${opts.gradeButton?`<button class="btn small" data-grade-child="${key}" data-grade-assignment="${esc(a.id)}">Add grade</button>`:''}</div>`;}
+    function missingRow(item){const {key,record,a,elapsed}=item,c=childClass(record.data,a.classId);return `<div class="activity-row alert-card" style="--class-color:${esc(c.color)}"><div class="student-avatar ${key==='sky'?'sky':''}">${CHILDREN[key].initial}</div><div class="item-main"><strong>${esc(a.title)}</strong><small>${esc(CHILDREN[key].name)} · ${esc(c.name)} · due ${fmt(a.dueDate)}</small><div class="meta"><span class="pill red">Grade missing</span><span class="pill gold">${elapsed} school day${elapsed===1?'':'s'} waiting</span>${a.completed?'<span class="pill green">Student marked complete</span>':'<span class="pill red">Also incomplete</span>'}</div></div><button class="btn small" data-grade-child="${key}" data-grade-assignment="${esc(a.id)}">Add grade</button></div>`;}
+    function classAverage(data,c){const cats=['homework','quiz','test','project'],parts=[];for(const cat of cats){const list=data.grades.filter(g=>g.classId===c.id&&g.category===cat&&Number(g.max)>0);if(list.length){const avg=list.reduce((n,g)=>n+Number(g.score),0)/list.reduce((n,g)=>n+Number(g.max),0)*100,weight=Number(c.weights?.[cat]??25);parts.push({avg,weight});}}if(!parts.length)return null;const total=parts.reduce((n,x)=>n+x.weight,0);return parts.reduce((n,x)=>n+x.avg*x.weight,0)/total;}
+    function scheduleRows(data){return [...data.classes].sort((a,b)=>a.period-b.period).map(c=>`<div class="schedule-row" style="--class-color:${esc(c.color)}"><div class="time">${humanTime(c.start)}<br>${humanTime(c.end)}</div><div class="dot"></div><div><strong>P${Number(c.period)} · ${esc(c.name)}</strong><small>${esc(c.teacher)} · Room ${esc(c.room||'—')}</small></div><span class="pill">P${Number(c.period)}</span></div>`).join('');}
+    function renderOverview(){
+      const map=datasets(),missing=missingGradeItems(map),overdue=overdueItems(map),soon=dueSoon(map),today=localISO();
+      const dueToday=allAssignments(map).filter(x=>x.a.dueDate===today&&!x.a.completed);
+      const top=[...overdue,...soon.filter(x=>!overdue.some(o=>o.key===x.key&&o.a.id===x.a.id))].slice(0,6);
+      document.getElementById('overview').innerHTML=`
+        <div class="card hero"><div class="hero-grid"><div><p class="eyebrow">Parent overview · 2026–27</p><h2>${missing.length?`${missing.length} grade ${missing.length===1?'needs':'grades need'} attention`:'Both planners are ready to monitor'}</h2><p>See Noble and Sky’s assignments, activities, schedules, grades, and overdue work together. Missing-grade flags remain until a matching grade is recorded.</p></div><div class="date-badge"><span class="big">${parseDate(today).getDate()}</span><span class="small">${fmt(today,{month:'short',weekday:'short'})}</span></div></div></div>
+        <div class="card card-pad" style="margin-top:16px"><div class="stats"><div class="stat"><strong>${dueToday.length}</strong><span>Due today</span></div><div class="stat alert"><strong>${overdue.length}</strong><span>Overdue work</span></div><div class="stat alert"><strong>${missing.length}</strong><span>Missing grades</span></div><div class="stat"><strong>${soon.length}</strong><span>Due in 7 days</span></div></div></div>
+        <div class="grid dashboard" style="margin-top:16px"><div class="stack">
+          <div class="card card-pad"><div class="card-title"><div><h3>Needs attention</h3><p>Top overdue and upcoming assignments for both students</p></div><button class="btn small secondary" data-go="activity">View all</button></div><div class="compact-list">${top.length?top.map(x=>assignmentRow(x)).join(''):empty('All clear','No overdue or upcoming assignments are saved yet.')}</div></div>
+          <div class="card card-pad"><div class="card-title"><div><h3>Missing-grade alerts</h3><p>Flagged after ${Number(parent.settings.alertThreshold||3)} school days without a grade</p></div><button class="btn small secondary" data-go="missing">Open alerts</button></div><div class="compact-list">${missing.length?missing.slice(0,4).map(missingRow).join(''):empty('No missing grades','Nothing has passed the three-school-day waiting period without a grade.')}</div></div>
+        </div><div class="stack">
+          ${Object.entries(map).map(([key,record])=>{const d=record.data,alerts=missing.filter(x=>x.key===key).length,late=overdue.filter(x=>x.key===key).length;return `<div class="card card-pad"><div class="student-banner"><div class="student-avatar ${key==='sky'?'sky':''}">${CHILDREN[key].initial}</div><div><h3>${CHILDREN[key].name}</h3><p>${CHILDREN[key].grade} · ${d.assignments.length} assignments</p></div></div><div class="stats" style="grid-template-columns:repeat(3,1fr);margin:14px 0"><div class="stat"><strong>${completedThisWeek(d)}</strong><span>Done this week</span></div><div class="stat alert"><strong>${late}</strong><span>Overdue</span></div><div class="stat alert"><strong>${alerts}</strong><span>Missing grades</span></div></div>${connectionHTML(key,record)}<button class="btn small secondary wide" style="margin-top:12px" data-go="${key}">View ${CHILDREN[key].name}</button></div>`;}).join('')}
+          <div class="card card-pad"><div class="card-title"><div><h3>Parent alerts</h3><p>Browser notifications while this dashboard is open</p></div></div><button class="btn wide" id="enableAlerts">Enable missing-grade alerts</button><p class="privacy-note" style="margin:10px 0 0">Your browser must give permission. Dashboard flags work even when notifications are off.</p></div>
+        </div></div>`;
+    }
+    function renderMissing(){const list=missingGradeItems();document.getElementById('missing').innerHTML=`<div class="page-head"><div><h2>Missing-grade alerts</h2><p>${list.length} assignment${list.length===1?'':'s'} still waiting for a recorded grade</p></div><button class="btn" id="enableAlerts">Enable alerts</button></div><div class="alert-rule"><strong>How the rule works:</strong> An assignment is flagged when ${Number(parent.settings.alertThreshold||3)} Monday–Friday school days have passed after its due date and no matching grade has been entered for that class and assignment. Weekends and dates listed as no-school days are skipped. The flag stays here until a grade is added.</div><div class="compact-list" style="margin-top:16px">${list.length?list.map(missingRow).join(''):empty('No missing grades','All assignments inside the waiting window have a recorded grade.')}</div>`;}
+    function renderActivity(){
+      const map=datasets(),assignments=allAssignments(map),events=upcomingEvents(map);let rows=[];
+      if(activityFilter==='all'||activityFilter==='assignments')rows.push(...assignments.map(x=>({date:x.a.dueDate,html:assignmentRow(x)})));
+      if(activityFilter==='all'||activityFilter==='events')rows.push(...events.map(x=>{const c=CHILDREN[x.key];return {date:x.e.date,html:`<div class="activity-row" style="--class-color:#16865c"><div class="student-avatar ${x.key==='sky'?'sky':''}">${c.initial}</div><div class="item-main"><strong>${esc(x.e.title)}</strong><small>${c.name} · ${fmt(x.e.date)}${x.e.time?` · ${humanTime(x.e.time)}`:''} · ${esc((x.e.type||'event').replace('-',' '))}</small>${x.e.notes?`<div class="meta"><span class="pill">${esc(x.e.notes)}</span></div>`:''}</div><span class="pill green">Event</span></div>`};}));
+      if(activityFilter==='all'||activityFilter==='study')for(const [key,record] of Object.entries(map))for(const s of record.data.studySessions)rows.push({date:s.date,html:`<div class="activity-row" style="--class-color:#8c4bc0"><div class="student-avatar ${key==='sky'?'sky':''}">${CHILDREN[key].initial}</div><div class="item-main"><strong>Study session · ${esc(childClass(record.data,s.classId).name)}</strong><small>${CHILDREN[key].name} · ${fmt(s.date)}${s.time?` · ${humanTime(s.time)}`:''} · ${Number(s.minutes||0)} minutes</small></div><span class="pill blue">Study</span></div>`});
+      rows.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+      document.getElementById('activity').innerHTML=`<div class="page-head"><div><h2>All activity</h2><p>Assignments, activities, family events, and study sessions for Noble and Sky</p></div><button class="btn secondary" onclick="window.print()">Print</button></div><div class="compact-list" style="display:flex;flex-wrap:wrap;margin-bottom:14px">${['all','assignments','events','study'].map(x=>`<button class="btn small ${activityFilter===x?'':'secondary'}" data-activity-filter="${x}">${x.replace(/^./,c=>c.toUpperCase())}</button>`).join('')}</div><div class="activity-list">${rows.length?rows.map(x=>x.html).join(''):empty('No saved activity','Planner assignments and events will appear here automatically.')}</div>`;
+    }
+    function renderChild(key){
+      const record=readChild(key),data=record.data,missing=missingGradeItems({[key]:record}),overdue=overdueItems({[key]:record}),soon=dueSoon({[key]:record}),grades=[...data.grades].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+      document.getElementById(key).innerHTML=`<div class="page-head"><div><h2>${CHILDREN[key].name}’s planner</h2><p>${CHILDREN[key].grade} · Rawlinson Middle School</p></div><button class="btn secondary" data-import-one="${key}">Import ${CHILDREN[key].name} backup</button></div>
+      <div class="student-banner"><div class="student-avatar ${key==='sky'?'sky':''}">${CHILDREN[key].initial}</div><div><h3>${CHILDREN[key].name}</h3><p>School year ${fmt(data.school.start,{month:'short',day:'numeric',year:'numeric'})}–${fmt(data.school.end,{month:'short',day:'numeric',year:'numeric'})}</p></div>${connectionHTML(key,record)}</div>
+      <div class="card card-pad" style="margin-top:16px"><div class="stats"><div class="stat"><strong>${data.assignments.length}</strong><span>All assignments</span></div><div class="stat alert"><strong>${overdue.length}</strong><span>Overdue</span></div><div class="stat alert"><strong>${missing.length}</strong><span>Missing grades</span></div><div class="stat"><strong>${soon.length}</strong><span>Due in 7 days</span></div></div></div>
+      <div class="grid two" style="margin-top:16px"><div class="stack"><div class="card card-pad"><div class="card-title"><div><h3>Class schedule</h3><p>Regular ${CHILDREN[key].grade.toLowerCase()} school day</p></div><span class="pill blue">8 periods</span></div><div class="schedule-list">${scheduleRows(data)}</div>${key==='sky'?'<div class="privacy-note" style="margin-top:10px">7th-grade lunch is 11:56 AM–12:26 PM between fourth and fifth-period Advanced ELA 7.</div>':'<div class="privacy-note" style="margin-top:10px">8th-grade lunch is 12:55–1:25 PM after fifth period.</div>'}</div><div class="card card-pad"><div class="card-title"><div><h3>Assignments</h3><p>All saved work</p></div></div><div class="compact-list">${data.assignments.length?allAssignments({[key]:record}).map(x=>assignmentRow(x)).join(''):empty('No assignments yet',`${CHILDREN[key].name}’s saved assignments will appear here.`)}</div></div></div>
+      <div class="stack"><div class="card card-pad"><div class="card-title"><div><h3>Class averages</h3><p>Calculated from recorded grades</p></div></div><div style="overflow:auto"><table class="grade-table"><thead><tr><th>Class</th><th>Average</th><th>Goal</th></tr></thead><tbody>${data.classes.map(c=>{const avg=classAverage(data,c);return `<tr><td><strong>${esc(c.name)}</strong><br><small>P${c.period} · ${esc(c.teacher)}</small></td><td class="grade-score">${avg===null?'—':avg.toFixed(1)+'%'}</td><td>${Number(c.goal||90)}%</td></tr>`;}).join('')}</tbody></table></div></div><div class="card card-pad"><div class="card-title"><div><h3>Recent grades</h3><p>Newest entries first</p></div></div><div class="activity-list">${grades.length?grades.slice(0,12).map(g=>`<div class="activity-row" style="--class-color:${esc(childClass(data,g.classId).color)}"><div class="student-avatar ${key==='sky'?'sky':''}">${CHILDREN[key].initial}</div><div class="item-main"><strong>${esc(g.name)}</strong><small>${esc(childClass(data,g.classId).name)} · ${fmt(g.date)} · ${esc(g.category||'grade')}</small></div><span class="pill green">${Number(g.score)}/${Number(g.max)}</span></div>`).join(''):empty('No grades recorded','Grades entered in the planner will appear here.')}</div></div></div></div>`;
+    }
+    function toggle(name,title,help){return `<div class="toggle-row"><div><strong>${esc(title)}</strong><small>${esc(help)}</small></div><label class="switch"><input type="checkbox" data-setting="${name}" ${parent.settings[name]?'checked':''}><span></span></label></div>`;}
+    function renderSettings(){document.getElementById('settings').innerHTML=`<div class="page-head"><div><h2>Parent dashboard settings</h2><p>Connections, alerts, accessibility, and backup</p></div></div><div class="grid two"><div class="stack"><div class="settings-section"><h3>Connect both planners</h3><p class="privacy-note">Automatic monitoring works when all three GitHub Pages apps use the same <strong>adhayes1906-coder.github.io</strong> address and are opened in the same browser profile. For another device, download each student’s planner backup and import it here.</p><button class="btn wide" style="margin-top:12px" id="importBoth">Import planner backup files</button><div style="margin-top:14px">${Object.entries(datasets()).map(([key,r])=>`<div class="toggle-row"><div><strong>${CHILDREN[key].name}</strong><small>${r.source==='live'?'Automatic browser connection':r.source==='import'?'Imported backup snapshot':'No saved planner activity found'}</small></div>${connectionHTML(key,r)}</div>`).join('')}</div></div><div class="settings-section"><h3>Missing-grade rule</h3><label>School days before flagging<select id="alertThreshold">${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(parent.settings.alertThreshold)===n?'selected':''}>${n} school day${n===1?'':'s'}</option>`).join('')}</select></label><label style="margin-top:12px">No-school dates — one YYYY-MM-DD date per line<textarea id="noSchoolDates" placeholder="2026-09-07&#10;2026-11-23">${esc(parent.settings.noSchoolDates.join('\n'))}</textarea></label><button class="btn" style="margin-top:12px" id="saveAlertRule">Save alert rule</button></div></div><div class="stack"><div class="settings-section"><h3>Appearance & accessibility</h3>${toggle('dark','Dark mode','Use a darker screen in the evening.')}${toggle('largeText','Large text','Increase text and control sizes.')}${toggle('highContrast','High contrast','Use stronger borders and contrast.')}${toggle('dyslexia','Easy-read font','Use wider letter and word spacing.')}${toggle('reduced','Reduced-distraction layout','Hide optional visual extras.')}</div><div class="settings-section"><h3>Alerts & parent backup</h3><button class="btn wide" id="enableAlerts">Enable missing-grade alerts</button><button class="btn secondary wide" style="margin-top:9px" id="exportParent">Download parent dashboard backup</button><p class="privacy-note" style="margin:10px 0 0">Browser notifications are checked while this dashboard is open. The red dashboard flags stay visible until a grade is entered, even when browser notifications are off.</p></div></div></div>`;}
+    function renderAll(){renderOverview();renderMissing();renderActivity();renderChild('noble');renderChild('sky');renderSettings();const count=missingGradeItems().length,b=document.getElementById('navAlertCount');b.textContent=count;b.hidden=!count;bindDynamic();}
+    function showPage(page){activePage=page;document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===page));document.querySelectorAll('.nav button[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page));window.scrollTo({top:0,behavior:'smooth'});}
+    function applySettings(){for(const k of ['dark','largeText','highContrast','dyslexia','reduced'])document.body.classList.toggle(k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase()),!!parent.settings[k]);document.getElementById('themeButton').textContent=parent.settings.dark?'☀':'☾';}
+    function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3500);}
+    function openGrade(key,id){const record=readChild(key),a=record.data.assignments.find(x=>x.id===id);if(!a)return;const c=childClass(record.data,a.classId);document.getElementById('modalTitle').textContent=`Add ${CHILDREN[key].name}’s grade`;document.getElementById('modalBody').innerHTML=`<form id="gradeForm" class="form-grid"><input type="hidden" name="key" value="${key}"><input type="hidden" name="assignmentId" value="${esc(a.id)}"><label class="full">Assignment<input name="name" value="${esc(a.title)}" required></label><label class="full">Class<input value="${esc(c.name)}" disabled><input type="hidden" name="classId" value="${esc(a.classId)}"></label><label>Category<select name="category">${['homework','quiz','test','project'].map(x=>`<option value="${x}" ${a.type===x?'selected':''}>${x.replace(/^./,c=>c.toUpperCase())}</option>`).join('')}</select></label><label>Date returned<input type="date" name="date" value="${localISO()}" required></label><label>Points earned<input type="number" name="score" min="0" step=".1" required></label><label>Points possible<input type="number" name="max" min=".1" step=".1" value="100" required></label><div class="privacy-note full">Saving this grade clears the missing-grade flag. If this dashboard is connected live, the grade is also written to ${CHILDREN[key].name}’s planner data in this browser.</div><button class="btn full">Save grade and clear flag</button></form>`;document.getElementById('modalBackdrop').classList.add('open');document.getElementById('gradeForm').onsubmit=saveGrade;}
+    function closeModal(){document.getElementById('modalBackdrop').classList.remove('open');}
+    function writeChild(key,data,source){if(source==='live'||source==='default'){localStorage.setItem(CHILDREN[key].storageKey,JSON.stringify(data));}else{parent.imports[key]={data,importedAt:new Date().toISOString()};saveParent();}}
+    function saveGrade(e){e.preventDefault();const f=new FormData(e.currentTarget),key=f.get('key'),record=readChild(key);record.data.grades.push({id:uid('g'),assignmentId:f.get('assignmentId'),classId:f.get('classId'),name:f.get('name').trim(),category:f.get('category'),score:Number(f.get('score')),max:Number(f.get('max')),date:f.get('date')});writeChild(key,record.data,record.source);closeModal();renderAll();showPage('missing');toast('Grade saved. The missing-grade flag was cleared.');}
+    function importFiles(files,forcedKey=''){for(const file of files){const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(!validPlanner(data))throw new Error();const name=normalize(data.profile?.name),key=forcedKey||(name.includes('noble')?'noble':name.includes('sky')?'sky':'');if(!key)throw new Error('name');const importedAt=new Date().toISOString();parent.imports[key]={data,importedAt};localStorage.setItem(CHILDREN[key].storageKey,JSON.stringify(data));saveParent();renderAll();showPage(key);toast(`${CHILDREN[key].name} planner backup imported.`);}catch(err){toast(`Could not identify ${file.name} as a Noble or Sky planner backup.`);}};reader.readAsText(file);}}
+    function exportParent(){const payload={exportedAt:new Date().toISOString(),parent,datasets:Object.fromEntries(Object.entries(datasets()).map(([k,v])=>[k,v.data]))},blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`hayes-parent-dashboard-backup-${localISO()}.json`;a.click();URL.revokeObjectURL(url);toast('Parent dashboard backup downloaded.');}
+    async function requestNotifications(){if(!('Notification'in window)){toast('This browser does not support notifications.');return;}const permission=await Notification.requestPermission();toast(permission==='granted'?'Missing-grade alerts enabled.':'Notifications were not enabled. Dashboard flags still work.');if(permission==='granted')checkNotifications();}
+    function checkNotifications(){if(!('Notification'in window)||Notification.permission!=='granted')return;const today=localISO();for(const item of missingGradeItems()){const key=`${today}|${item.key}|${item.a.id}`;if(parent.notificationLedger[key])continue;new Notification(`${CHILDREN[item.key].name}: grade still missing`,{body:`${item.a.title} · due ${fmt(item.a.dueDate)} · waiting ${item.elapsed} school days`});parent.notificationLedger[key]=true;}saveParent();}
+    function saveAlertRule(){const raw=document.getElementById('noSchoolDates').value.split(/\s+/).map(x=>x.trim()).filter(Boolean),valid=raw.filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x));parent.settings.noSchoolDates=[...new Set(valid)].sort();parent.settings.alertThreshold=Number(document.getElementById('alertThreshold').value);saveParent();renderAll();showPage('settings');toast('Missing-grade rule saved.');}
+    function bindDynamic(){
+      document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>showPage(b.dataset.go));
+      document.querySelectorAll('[data-grade-child]').forEach(b=>b.onclick=()=>openGrade(b.dataset.gradeChild,b.dataset.gradeAssignment));
+      document.querySelectorAll('[data-activity-filter]').forEach(b=>b.onclick=()=>{activityFilter=b.dataset.activityFilter;renderActivity();bindDynamic();});
+      document.querySelectorAll('[data-import-one]').forEach(b=>b.onclick=()=>{const input=document.getElementById('importInput');input.dataset.forcedKey=b.dataset.importOne;input.click();});
+      document.querySelectorAll('#enableAlerts').forEach(b=>b.onclick=requestNotifications);
+      document.querySelectorAll('[data-setting]').forEach(x=>x.onchange=()=>{parent.settings[x.dataset.setting]=x.checked;saveParent();applySettings();renderSettings();bindDynamic();});
+      const both=document.getElementById('importBoth');if(both)both.onclick=()=>{const input=document.getElementById('importInput');input.dataset.forcedKey='';input.click();};
+      const save=document.getElementById('saveAlertRule');if(save)save.onclick=saveAlertRule;
+      const exp=document.getElementById('exportParent');if(exp)exp.onclick=exportParent;
+    }
+    document.querySelectorAll('.nav button[data-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+    document.getElementById('refreshButton').onclick=()=>{renderAll();showPage(activePage);checkNotifications();toast('Both planners refreshed.');};
+    document.getElementById('themeButton').onclick=()=>{parent.settings.dark=!parent.settings.dark;saveParent();applySettings();renderSettings();bindDynamic();};
+    document.getElementById('modalClose').onclick=closeModal;
+    document.getElementById('modalBackdrop').onclick=e=>{if(e.target.id==='modalBackdrop')closeModal();};
+    document.getElementById('importInput').onchange=e=>{if(e.target.files.length)importFiles([...e.target.files],e.target.dataset.forcedKey||'');e.target.value='';e.target.dataset.forcedKey='';};
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+    window.addEventListener('storage',e=>{if(Object.values(CHILDREN).some(c=>c.storageKey===e.key)){renderAll();showPage(activePage);toast('A student planner was updated.');}});
+    applySettings();renderAll();checkNotifications();setInterval(()=>{renderAll();checkNotifications();},60000);
+  })();
+  </script>
+</body>
+</html>
