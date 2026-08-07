@@ -98,6 +98,19 @@
     .schedule-row .dot { width:9px; height:34px; border-radius:9px; background:var(--class-color,var(--blue)); }
     .schedule-row strong { display:block; font-size:.86rem; }
     .schedule-row small { color:var(--muted); }
+    .calendar-toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+    .calendar-toolbar h3 { min-width:190px; margin:0; text-align:center; }
+    .month-grid { display:grid; grid-template-columns:repeat(7,minmax(90px,1fr)); overflow:auto; border-top:1px solid var(--line); border-left:1px solid var(--line); border-radius:14px; background:#fff; }
+    .weekday { min-width:90px; padding:9px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); text-align:center; color:var(--muted); background:#f6f8fb; font-size:.72rem; font-weight:900; text-transform:uppercase; }
+    .day-cell { min-width:90px; min-height:124px; padding:7px; border:0; border-right:1px solid var(--line); border-bottom:1px solid var(--line); text-align:left; color:var(--ink); background:#fff; cursor:pointer; }
+    .day-cell:hover { background:#eef4fb; }
+    .day-cell.outside { color:#9aa5b4; background:#f8fafc; }
+    .day-cell.today { box-shadow:inset 0 0 0 3px #84aef0; }
+    .day-cell.selected { box-shadow:inset 0 0 0 3px var(--navy); }
+    .day-number { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; font-size:.75rem; font-weight:900; }
+    .cal-line { display:block; width:100%; margin:3px 0; padding:4px 6px; overflow:hidden; border-left:4px solid var(--event-color,var(--blue)); border-radius:6px; text-overflow:ellipsis; white-space:nowrap; color:#26354a; background:#edf3fb; font-size:.64rem; }
+    .day-agenda { display:grid; gap:9px; }
+    .calendar-detail { margin-top:16px; }
     .student-banner { display:flex; align-items:center; gap:14px; padding:17px; border:1px solid var(--line); border-radius:16px; background:linear-gradient(120deg,#fff,#f5f8fc); }
     .student-banner .student-avatar { width:52px; height:52px; border-radius:15px; font-size:1.25rem; }
     .student-banner h3 { margin:0; font-size:1.2rem; }
@@ -136,7 +149,9 @@
     .toast.show { opacity:1; transform:none; }
     body.dark { --ink:#eef4ff; --muted:#a8b4c7; --line:#34435a; --card:#172337; --bg:#0e1828; --soft:#172337; --shadow:0 10px 30px rgba(0,0,0,.18); }
     body.dark .nav,body.dark input,body.dark select,body.dark textarea,body.dark .btn.secondary,body.dark .activity-row,body.dark .priority-item,body.dark .settings-section,body.dark .modal,body.dark .modal-head { color:var(--ink); background:#172337; }
-    body.dark .stat,body.dark .schedule-row,body.dark .empty,body.dark .student-banner { background:#202e43; }
+    body.dark .stat,body.dark .schedule-row,body.dark .empty,body.dark .student-banner,body.dark .day-cell { background:#202e43; }
+    body.dark .month-grid,body.dark .weekday { background:#172337; }
+    body.dark .cal-line { color:#e6eef9; background:#263750; }
     body.dark .student-banner { background:linear-gradient(120deg,#172337,#202e43); }
     body.high-contrast { --ink:#000; --muted:#202020; --line:#111; --bg:#fff; --card:#fff; --navy:#002c6d; --blue:#004fd1; }
     body.high-contrast .card,body.high-contrast input,body.high-contrast select,body.high-contrast textarea { border-width:2px; }
@@ -180,6 +195,7 @@
     <div class="layout">
       <nav class="nav" aria-label="Main navigation">
         <button class="active" data-page="overview"><span class="nav-icon">⌂</span> Overview</button>
+        <button data-page="calendar"><span class="nav-icon">▦</span> Calendar</button>
         <button data-page="missing"><span class="nav-icon">!</span> Missing grades <span class="nav-count" id="navAlertCount" hidden>0</span></button>
         <button data-page="activity"><span class="nav-icon">☷</span> All activity</button>
         <button data-page="noble"><span class="nav-icon">N</span> Noble</button>
@@ -189,6 +205,7 @@
       </nav>
       <main>
         <section class="page active" id="overview"></section>
+        <section class="page" id="calendar"></section>
         <section class="page" id="missing"></section>
         <section class="page" id="activity"></section>
         <section class="page" id="noble"></section>
@@ -230,7 +247,7 @@
       ]}
     };
     const parentDefaults={imports:{},notificationLedger:{},settings:{dark:false,largeText:false,highContrast:false,dyslexia:false,reduced:false,noSchoolDates:[],alertThreshold:3}};
-    let parent=loadParent(), activePage='overview', activityFilter='all', toastTimer;
+    let parent=loadParent(), activePage='overview', activityFilter='all', parentCalendarCursor=parseDate(localISO()), selectedParentDate=localISO(), toastTimer;
 
     function clone(v){return JSON.parse(JSON.stringify(v));}
     function loadParent(){try{const x=JSON.parse(localStorage.getItem(PARENT_KEY));return {...clone(parentDefaults),...x,settings:{...parentDefaults.settings,...(x?.settings||{})},imports:x?.imports||{},notificationLedger:x?.notificationLedger||{}};}catch(e){return clone(parentDefaults);}}
@@ -278,6 +295,38 @@
       const lunch={afterPeriod:isSeventh?4:5,start:isSeventh?'11:56':'12:55',end:isSeventh?'12:26':'13:25',title:isSeventh?'7th Grade Lunch':'8th Grade Lunch'};
       return [...data.classes].sort((a,b)=>a.period-b.period).map(c=>`<div class="schedule-row" style="--class-color:${esc(c.color)}"><div class="time">${humanTime(c.start)}<br>${humanTime(c.end)}</div><div class="dot"></div><div><strong>P${Number(c.period)} · ${esc(c.name)}</strong><small>${esc(c.teacher)} · Room ${esc(c.room||'—')}</small></div><span class="pill">P${Number(c.period)}</span></div>${Number(c.period)===lunch.afterPeriod?`<div class="schedule-row" style="--class-color:#5d6b7f"><div class="time">${humanTime(lunch.start)}<br>${humanTime(lunch.end)}</div><div class="dot"></div><div><strong>${lunch.title}</strong><small>30-minute lunch period</small></div><span class="pill">Lunch</span></div>`:''}`).join('');
     }
+    function parentEventOccurs(e,iso){
+      if(!e?.date||iso<e.date)return false;
+      if(e.recurrence==='daily')return true;
+      if(e.recurrence==='weekly')return parseDate(e.date).getDay()===parseDate(iso).getDay();
+      if(e.recurrence==='monthly')return parseDate(e.date).getDate()===parseDate(iso).getDate();
+      return e.date===iso;
+    }
+    function childEventsOn(data,iso){return data.events.filter(e=>parentEventOccurs(e,iso)).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));}
+    function childIsSchoolDay(data,iso){const day=parseDate(iso).getDay();return iso>=data.school.start&&iso<=data.school.end&&day!==0&&day!==6&&!parent.settings.noSchoolDates.includes(iso)&&!childEventsOn(data,iso).some(e=>e.type==='no-school');}
+    function startOfWeek(date){const d=new Date(date),day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);d.setHours(0,0,0,0);return d;}
+    function childCalendarExtras(key,record,iso){
+      const events=childEventsOn(record.data,iso).map(e=>({kind:'event',key,record,date:iso,time:e.time||'',title:e.title,data:e,color:'#16865c'}));
+      const assignments=record.data.assignments.filter(a=>a.dueDate===iso).map(a=>({kind:'assignment',key,record,date:iso,time:'',title:a.title,data:a,color:childClass(record.data,a.classId).color}));
+      return [...events,...assignments].sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+    }
+    function parentCalendarDayCard(key,record,iso){
+      const data=record.data,schoolDay=childIsSchoolDay(data,iso),extras=childCalendarExtras(key,record,iso),c=CHILDREN[key];
+      const extraRows=extras.map(x=>x.kind==='assignment'?assignmentRow({key,record,a:x.data}):`<div class="activity-row" style="--class-color:#16865c"><div class="student-avatar ${key==='sky'?'sky':''}">${c.initial}</div><div class="item-main"><strong>${esc(x.data.title)}</strong><small>${x.data.time?humanTime(x.data.time)+' · ':''}${esc((x.data.type||'event').replace('-',' '))}</small>${x.data.notes?`<div class="meta"><span class="pill">${esc(x.data.notes)}</span></div>`:''}</div><span class="pill green">Activity</span></div>`).join('');
+      return `<div class="card card-pad"><div class="student-banner"><div class="student-avatar ${key==='sky'?'sky':''}">${c.initial}</div><div><h3>${c.name}</h3><p>${c.grade} · ${schoolDay?'Complete school day':'No regular classes'}</p></div></div><div class="grid two" style="margin-top:14px"><div><div class="card-title"><div><h3>Classes and lunch</h3><p>${schoolDay?'8 classes + lunch':'Weekend or no-school day'}</p></div></div><div class="schedule-list">${schoolDay?scheduleRows(data):empty('No class schedule','Classes appear here only on regular school days.')}</div></div><div><div class="card-title"><div><h3>Assignments and activities</h3><p>${extras.length} additional item${extras.length===1?'':'s'}</p></div></div><div class="day-agenda">${extraRows||empty('No additional activities','No assignments, practices, games, appointments, or other events are saved for this day.')}</div></div></div></div>`;
+    }
+    function renderParentCalendar(){
+      const map=datasets(),first=new Date(parentCalendarCursor.getFullYear(),parentCalendarCursor.getMonth(),1),start=startOfWeek(first),cells=[];
+      for(let i=0;i<42;i++){
+        const d=new Date(start);d.setDate(start.getDate()+i);const iso=toISO(d),outside=d.getMonth()!==parentCalendarCursor.getMonth(),lines=[];
+        for(const [key,record] of Object.entries(map)){
+          if(childIsSchoolDay(record.data,iso))lines.push(`<span class="cal-line" style="--event-color:${key==='sky'?'#a62126':'#163b72'}">${CHILDREN[key].initial} · 8 classes + lunch</span>`);
+          childCalendarExtras(key,record,iso).slice(0,1).forEach(x=>lines.push(`<span class="cal-line" style="--event-color:${esc(x.color)}">${CHILDREN[key].initial} · ${esc(x.title)}</span>`));
+        }
+        cells.push(`<button class="day-cell ${outside?'outside':''} ${iso===localISO()?'today':''} ${iso===selectedParentDate?'selected':''}" data-parent-calendar-date="${iso}"><span class="day-number"><span>${d.getDate()}</span>${iso===SCHOOL_START?'<span class="pill blue">First</span>':iso===SCHOOL_END?'<span class="pill red">Last</span>':''}</span>${lines.slice(0,4).join('')}${lines.length>4?`<small>+${lines.length-4} more</small>`:''}</button>`);
+      }
+      document.getElementById('calendar').innerHTML=`<div class="page-head"><div><h2>Family calendar</h2><p>Click any day to see Noble’s and Sky’s complete class schedules, lunch, assignments, and activities.</p></div><button class="btn secondary" onclick="window.print()">Print</button></div><div class="card card-pad"><div class="calendar-toolbar"><div><button class="btn small secondary" data-parent-calendar-nav="-1">‹</button> <button class="btn small secondary" data-parent-calendar-today>Today</button> <button class="btn small secondary" data-parent-calendar-nav="1">›</button></div><h3>${parentCalendarCursor.toLocaleDateString(undefined,{month:'long',year:'numeric'})}</h3><span class="pill blue">Noble + Sky</span></div><div class="month-grid">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(x=>`<div class="weekday">${x}</div>`).join('')}${cells.join('')}</div></div><div class="calendar-detail"><div class="page-head" style="margin-bottom:14px"><div><h2>${fmtLong(selectedParentDate)}</h2><p>Complete family schedule for the selected day</p></div></div><div class="stack">${parentCalendarDayCard('noble',map.noble,selectedParentDate)}${parentCalendarDayCard('sky',map.sky,selectedParentDate)}</div></div>`;
+    }
     function renderOverview(){
       const map=datasets(),missing=missingGradeItems(map),overdue=overdueItems(map),soon=dueSoon(map),today=localISO();
       const dueToday=allAssignments(map).filter(x=>x.a.dueDate===today&&!x.a.completed);
@@ -312,7 +361,7 @@
     }
     function toggle(name,title,help){return `<div class="toggle-row"><div><strong>${esc(title)}</strong><small>${esc(help)}</small></div><label class="switch"><input type="checkbox" data-setting="${name}" ${parent.settings[name]?'checked':''}><span></span></label></div>`;}
     function renderSettings(){document.getElementById('settings').innerHTML=`<div class="page-head"><div><h2>Parent dashboard settings</h2><p>Connections, alerts, accessibility, and backup</p></div></div><div class="grid two"><div class="stack"><div class="settings-section"><h3>Connect both planners</h3><p class="privacy-note">Automatic monitoring works when all three GitHub Pages apps use the same <strong>adhayes1906-coder.github.io</strong> address and are opened in the same browser profile. For another device, download each student’s planner backup and import it here.</p><button class="btn wide" style="margin-top:12px" id="importBoth">Import planner backup files</button><div style="margin-top:14px">${Object.entries(datasets()).map(([key,r])=>`<div class="toggle-row"><div><strong>${CHILDREN[key].name}</strong><small>${r.source==='live'?'Automatic browser connection':r.source==='import'?'Imported backup snapshot':'No saved planner activity found'}</small></div>${connectionHTML(key,r)}</div>`).join('')}</div></div><div class="settings-section"><h3>Missing-grade rule</h3><label>School days before flagging<select id="alertThreshold">${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(parent.settings.alertThreshold)===n?'selected':''}>${n} school day${n===1?'':'s'}</option>`).join('')}</select></label><label style="margin-top:12px">No-school dates — one YYYY-MM-DD date per line<textarea id="noSchoolDates" placeholder="2026-09-07&#10;2026-11-23">${esc(parent.settings.noSchoolDates.join('\n'))}</textarea></label><button class="btn" style="margin-top:12px" id="saveAlertRule">Save alert rule</button></div></div><div class="stack"><div class="settings-section"><h3>Appearance & accessibility</h3>${toggle('dark','Dark mode','Use a darker screen in the evening.')}${toggle('largeText','Large text','Increase text and control sizes.')}${toggle('highContrast','High contrast','Use stronger borders and contrast.')}${toggle('dyslexia','Easy-read font','Use wider letter and word spacing.')}${toggle('reduced','Reduced-distraction layout','Hide optional visual extras.')}</div><div class="settings-section"><h3>Alerts & parent backup</h3><button class="btn wide" id="enableAlerts">Enable missing-grade alerts</button><button class="btn secondary wide" style="margin-top:9px" id="exportParent">Download parent dashboard backup</button><p class="privacy-note" style="margin:10px 0 0">Browser notifications are checked while this dashboard is open. The red dashboard flags stay visible until a grade is entered, even when browser notifications are off.</p></div></div></div>`;}
-    function renderAll(){renderOverview();renderMissing();renderActivity();renderChild('noble');renderChild('sky');renderSettings();const count=missingGradeItems().length,b=document.getElementById('navAlertCount');b.textContent=count;b.hidden=!count;bindDynamic();}
+    function renderAll(){renderOverview();renderParentCalendar();renderMissing();renderActivity();renderChild('noble');renderChild('sky');renderSettings();const count=missingGradeItems().length,b=document.getElementById('navAlertCount');b.textContent=count;b.hidden=!count;bindDynamic();}
     function showPage(page){activePage=page;document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===page));document.querySelectorAll('.nav button[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page));window.scrollTo({top:0,behavior:'smooth'});}
     function applySettings(){for(const k of ['dark','largeText','highContrast','dyslexia','reduced'])document.body.classList.toggle(k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase()),!!parent.settings[k]);document.getElementById('themeButton').textContent=parent.settings.dark?'☀':'☾';}
     function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3500);}
@@ -329,6 +378,9 @@
       document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>showPage(b.dataset.go));
       document.querySelectorAll('[data-grade-child]').forEach(b=>b.onclick=()=>openGrade(b.dataset.gradeChild,b.dataset.gradeAssignment));
       document.querySelectorAll('[data-activity-filter]').forEach(b=>b.onclick=()=>{activityFilter=b.dataset.activityFilter;renderActivity();bindDynamic();});
+      document.querySelectorAll('[data-parent-calendar-date]').forEach(b=>b.onclick=()=>{selectedParentDate=b.dataset.parentCalendarDate;parentCalendarCursor=parseDate(selectedParentDate);renderParentCalendar();bindDynamic();});
+      document.querySelectorAll('[data-parent-calendar-nav]').forEach(b=>b.onclick=()=>{parentCalendarCursor=new Date(parentCalendarCursor.getFullYear(),parentCalendarCursor.getMonth()+Number(b.dataset.parentCalendarNav),1);renderParentCalendar();bindDynamic();});
+      document.querySelectorAll('[data-parent-calendar-today]').forEach(b=>b.onclick=()=>{selectedParentDate=localISO();parentCalendarCursor=parseDate(selectedParentDate);renderParentCalendar();bindDynamic();});
       document.querySelectorAll('[data-import-one]').forEach(b=>b.onclick=()=>{const input=document.getElementById('importInput');input.dataset.forcedKey=b.dataset.importOne;input.click();});
       document.querySelectorAll('#enableAlerts').forEach(b=>b.onclick=requestNotifications);
       document.querySelectorAll('[data-setting]').forEach(x=>x.onchange=()=>{parent.settings[x.dataset.setting]=x.checked;saveParent();applySettings();renderSettings();bindDynamic();});
