@@ -115,8 +115,10 @@
     .student-tabs { display:flex; gap:7px; padding:5px; margin-bottom:14px; border-radius:13px; background:#e6edf6; }
     .student-tabs button { flex:1; min-height:43px; padding:8px 12px; border:0; border-radius:10px; color:#506078; background:transparent; font-weight:900; }
     .student-tabs button.active { color:#fff; background:var(--navy); box-shadow:0 3px 9px rgba(20,40,70,.16); }
-    .student-tabs button[data-parent-calendar-child="sky"].active { background:var(--red); }
-    .student-tabs button[data-parent-calendar-child="lyric"].active { background:#7d51bd; }
+    .student-tabs button[data-parent-calendar-child="sky"].active,
+    .student-tabs button[data-parent-tutoring-child="sky"].active { background:var(--red); }
+    .student-tabs button[data-parent-calendar-child="lyric"].active,
+    .student-tabs button[data-parent-tutoring-child="lyric"].active { background:#7d51bd; }
     .student-banner { display:flex; align-items:center; gap:14px; padding:17px; border:1px solid var(--line); border-radius:16px; background:linear-gradient(120deg,#fff,#f5f8fc); }
     .student-banner .student-avatar { width:52px; height:52px; border-radius:15px; font-size:1.25rem; }
     .student-banner h3 { margin:0; font-size:1.2rem; }
@@ -204,6 +206,7 @@
         <button data-page="calendar"><span class="nav-icon">▦</span> Calendar</button>
         <button data-page="missing"><span class="nav-icon">!</span> Missing grades <span class="nav-count" id="navAlertCount" hidden>0</span></button>
         <button data-page="activity"><span class="nav-icon">☷</span> All activity</button>
+        <button data-page="tutoring"><span class="nav-icon">?</span> Tutoring Hours</button>
         <button data-page="noble"><span class="nav-icon">N</span> Noble</button>
         <button data-page="sky"><span class="nav-icon">S</span> Sky</button>
         <button data-page="lyric"><span class="nav-icon">L</span> Lyric</button>
@@ -215,6 +218,7 @@
         <section class="page" id="calendar"></section>
         <section class="page" id="missing"></section>
         <section class="page" id="activity"></section>
+        <section class="page" id="tutoring"></section>
         <section class="page" id="noble"></section>
         <section class="page" id="sky"></section>
         <section class="page" id="lyric"></section>
@@ -236,7 +240,7 @@
       noble:{name:'Noble',initial:'N',grade:'8th Grade',school:'Rawlinson Middle School',storageKey:'noble-school-planner-v1',classes:[
         {id:'pe',period:1,name:'PE 8 / Athletics (Boys)',room:'E101',teacher:'Diaz',start:'08:35',end:'09:20',color:'#2f6fed',goal:85,weights:{homework:20,quiz:20,test:35,project:25}},
         {id:'history',period:2,name:'Advanced U.S. History 8',room:'C217',teacher:'Lopez',start:'09:24',end:'10:14',color:'#b65b19',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
-        {id:'spanish',period:3,name:'Spanish I MS',room:'B109',teacher:'Medina',start:'10:18',end:'11:03',color:'#8c4bc0',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'spanish',period:3,name:'Spanish I MS',room:'B109',teacher:'Medina',start:'10:18',end:'11:03',color:'#8c4bc0',goal:90,weights:{formative:50,summative:50},gradingPolicy:{type:'formative-summative',formative:50,summative:50,source:'Lydia Medina Spanish 1 syllabus'}},
         {id:'avid',period:4,name:'AVID A HS',room:'B204',teacher:'Reyes',start:'11:07',end:'11:52',color:'#cf3b67',goal:90,weights:{formative:50,summative:50},gradingPolicy:{type:'formative-summative',formative:50,summative:50,semesterExam:10,source:'Coach Reyes AVID 1 syllabus'}},
         {id:'algebra',period:5,name:'Advanced MS Algebra I',room:'B216',teacher:'Sosa',start:'11:56',end:'12:51',color:'#16865c',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
         {id:'science',period:6,name:'Advanced Science 8',room:'B221',teacher:'Herrera',start:'13:29',end:'14:14',color:'#008a9a',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
@@ -244,7 +248,7 @@
         {id:'ela',period:8,name:'Advanced ELA 8',room:'B207',teacher:'Rangel',start:'15:07',end:'15:55',color:'#a62126',goal:90,weights:{homework:20,quiz:20,test:35,project:25}}
       ]},
       sky:{name:'Sky',initial:'S',grade:'7th Grade',school:'Rawlinson Middle School',storageKey:'sky-school-planner-v1',classes:[
-        {id:'band',period:1,name:'Beginner Band',room:'F101',teacher:'Medariaga Santos',start:'08:35',end:'09:20',color:'#2f6fed',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'band',period:1,name:'Beginner Band',room:'F101',teacher:'Medariaga Santos',start:'08:35',end:'09:20',color:'#2f6fed',goal:90,weights:{formative:50,summative:50},gradingPolicy:{type:'formative-summative',formative:50,summative:50,source:'Rawlinson Band syllabus'}},
         {id:'art',period:2,name:'Art 2 MS',room:'B123',teacher:'Coker',start:'09:24',end:'10:14',color:'#b65b19',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
         {id:'science',period:3,name:'Advanced Science 7',room:'B218',teacher:'Speelman',start:'10:18',end:'11:03',color:'#8c4bc0',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
         {id:'ela',period:4,name:'Advanced ELA 7',room:'C221',teacher:'Leigh-Gomez',start:'11:07',end:'11:52',color:'#cf3b67',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
@@ -254,7 +258,7 @@
         {id:'pe',period:8,name:'PE 7 / Athletics (Boys)',room:'E101',teacher:'Diaz',start:'15:07',end:'15:55',color:'#a62126',goal:85,weights:{homework:20,quiz:20,test:35,project:25}}
       ]},
       lyric:{name:'Lyric',initial:'L',grade:'10th Grade',school:'Clark High School',storageKey:'lyric-school-planner-v1',classes:[
-        {id:'algebra2',period:1,name:'Algebra 2',room:'C110',teacher:'Rubio, Deborah',start:'09:00',end:'09:50',earlyStart:'09:00',earlyEnd:'09:25',color:'#2f6fed',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'algebra2',period:1,name:'Algebra 2',room:'C110',teacher:'Rubio, Deborah',start:'09:00',end:'09:50',earlyStart:'09:00',earlyEnd:'09:25',color:'#2f6fed',goal:90,weights:{formative:40,summative:60},gradingPolicy:{type:'formative-summative',formative:40,summative:60,semesterExam:10,source:'Deborah Rubio Algebra 2 syllabus'}},
         {id:'spanish2',period:2,name:'Spanish 2',room:'A105',teacher:'Granado, Xiomara',start:'09:55',end:'10:50',earlyStart:'09:30',earlyEnd:'09:55',color:'#b65b19',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
         {id:'worldhistory',period:3,name:'World History',room:'A211',teacher:'White, Karla',start:'10:55',end:'11:45',earlyStart:'10:00',earlyEnd:'10:25',color:'#8c4bc0',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
         {id:'avtech',period:4,name:'Principles of Arts, A/V Technology & Communications',room:'C204',teacher:'Reyes, Lesley',start:'11:50',end:'12:40',earlyStart:'10:30',earlyEnd:'10:55',color:'#cf3b67',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
@@ -263,6 +267,22 @@
         {id:'english2',period:7,name:'English 2',room:'A209',teacher:'Jones, Crystal',start:'14:35',end:'15:25',earlyStart:'12:00',earlyEnd:'12:25',color:'#d58a00',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
         {id:'chemistry1',period:8,name:'Chemistry 1',room:'A049',teacher:'Tovar, Selene',start:'15:30',end:'16:20',earlyStart:'12:30',earlyEnd:'13:00',color:'#a62126',goal:90,weights:{homework:20,quiz:20,test:35,project:25}}
       ]}
+    };
+    const TUTORING_HOURS={
+      noble:[
+        {classId:'spanish',teacher:'Lydia Medina',room:'B109',source:'Spanish 1 syllabus',sessions:[{days:'Thursday',time:'7:50–8:30 AM',note:'Morning tutoring'},{days:'Wednesday & Thursday',time:'4:00–4:30 PM',note:'After school by appointment'}]},
+        {classId:'avid',teacher:'Coach Roger Reyes',room:'B204',source:'Coach Reyes AVID 1 syllabus',sessions:[{days:'Tuesday–Friday',time:'8:00–8:30 AM',note:'Morning tutoring'},{days:'After school',time:'By appointment only',note:'Contact Coach Reyes to arrange a time'}]}
+      ],
+      sky:[
+        {classId:'band',teacher:'Mrs. Cyr & Mr. Santos',room:'F101 / Band Hall',source:'Rawlinson Band syllabus',sessions:[{days:'Monday–Friday',time:'7:30–8:30 AM',note:'Morning tutoring'},{days:'Monday, Wednesday, Thursday & Friday',time:'4:05–5:30 PM',note:'No after-school tutoring on Tuesdays'}]},
+        {classId:'math',teacher:'Ms. Isabel Pisano',room:'B210',source:'7th Grade Advanced Math syllabus',sessions:[{days:'Tuesday & Thursday',time:'7:50–8:30 AM',note:'Morning tutoring'}]}
+      ],
+      lyric:[
+        {classId:'algebra2',teacher:'Deborah Rubio (Lyric’s teacher)',room:'C110',source:'Deborah Rubio Algebra 2 syllabus',sessions:[{days:'Tuesday',time:'8:15–8:45 AM',note:'Morning tutoring'},{days:'Thursday',time:'4:20–4:50 PM',note:'After-school tutoring'}]},
+        {classId:'algebra2',teacher:'Johnson',room:'C215',source:'Algebra 2 tutoring team',sessions:[{days:'Tuesday',time:'8:15–8:45 AM',note:'Morning tutoring'},{days:'Wednesday',time:'4:20–4:50 PM',note:'After-school tutoring'}]},
+        {classId:'algebra2',teacher:'Nicholson',room:'C217',source:'Algebra 2 tutoring team',sessions:[{days:'Monday & Thursday',time:'4:20–4:50 PM',note:'After-school tutoring'}]},
+        {classId:'algebra2',teacher:'Pedroza',room:'C218',source:'Algebra 2 tutoring team',sessions:[{days:'Tuesday & Wednesday',time:'4:20–4:50 PM',note:'After-school tutoring'}]}
+      ]
     };
     const NOBLE_FOOTBALL_EVENTS = [
       {id:'football-8-practice-2026-08-11',title:'8th Grade Football Practice',type:'activity',date:'2026-08-11',time:'06:30',recurrence:'none',notes:'First day of football practice.'},
@@ -318,13 +338,14 @@
       {id:'football-8-game-2026-10-24',title:'8th Grade Football A Team Extra Game',type:'activity',date:'2026-10-24',time:'',recurrence:'none',notes:'Opponent, location, and game time were not listed on the supplied football calendar.'}
     ];
     const parentDefaults={imports:{},notificationLedger:{},settings:{dark:false,largeText:false,highContrast:false,dyslexia:false,reduced:false,noSchoolDates:[],alertThreshold:3}};
-    let parent=loadParent(), activePage='overview', activityFilter='all', parentCalendarCursor=parseDate(localISO()), selectedParentDate=localISO(), selectedParentChild='noble', toastTimer;
+    let parent=loadParent(), activePage='overview', activityFilter='all', parentCalendarCursor=parseDate(localISO()), selectedParentDate=localISO(), selectedParentChild='noble', selectedTutoringChild='noble', toastTimer;
 
     function clone(v){return JSON.parse(JSON.stringify(v));}
     function applyKnownGradingPolicies(key,classes=[]){
-      const list=Array.isArray(classes)?clone(classes):clone(CHILDREN[key].classes),id=({noble:'avid',sky:'math'})[key],target=id?list.find(c=>c.id===id):null;
-      if(target&&key==='noble'){target.weights={formative:50,summative:50};target.gradingPolicy={type:'formative-summative',formative:50,summative:50,semesterExam:10,source:'Coach Reyes AVID 1 syllabus'};}
-      if(target&&key==='sky'){target.weights={formative:40,summative:60};target.gradingPolicy={type:'formative-summative',formative:40,summative:60,source:'Ms. Pisano 7th Grade Advanced Math syllabus'};}
+      const list=Array.isArray(classes)?clone(classes):clone(CHILDREN[key].classes),setPolicy=(id,formative,summative,source,semesterExam=0)=>{const c=list.find(x=>x.id===id);if(c){c.weights={formative,summative};c.gradingPolicy={type:'formative-summative',formative,summative,source,...(semesterExam?{semesterExam}:{})};}};
+      if(key==='noble'){setPolicy('avid',50,50,'Coach Reyes AVID 1 syllabus',10);setPolicy('spanish',50,50,'Lydia Medina Spanish 1 syllabus');}
+      if(key==='sky'){setPolicy('math',40,60,'Ms. Pisano 7th Grade Advanced Math syllabus');setPolicy('band',50,50,'Rawlinson Band syllabus');}
+      if(key==='lyric')setPolicy('algebra2',40,60,'Deborah Rubio Algebra 2 syllabus',10);
       return list;
     }
     function withNobleFootball(key,events=[]){
@@ -451,6 +472,15 @@
       rows.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
       document.getElementById('activity').innerHTML=`<div class="page-head"><div><h2>All activity</h2><p>Assignments, activities, family events, and study sessions for Noble, Sky, and Lyric</p></div><button class="btn secondary" onclick="window.print()">Print</button></div><div class="compact-list" style="display:flex;flex-wrap:wrap;margin-bottom:14px">${['all','assignments','events','study'].map(x=>`<button class="btn small ${activityFilter===x?'':'secondary'}" data-activity-filter="${x}">${x.replace(/^./,c=>c.toUpperCase())}</button>`).join('')}</div><div class="activity-list">${rows.length?rows.map(x=>x.html).join(''):empty('No saved activity','Planner assignments and events will appear here automatically.')}</div>`;
     }
+    function parentTutoringCard(key){
+      const record=readChild(key),data=record.data,hours=TUTORING_HOURS[key]||[],covered=new Set(hours.map(x=>x.classId));
+      const cards=hours.map(item=>{const c=childClass(data,item.classId);return `<div class="card card-pad" style="border-top:5px solid ${esc(c.color)}"><div class="card-title"><div><h3>${esc(c.name)}</h3><p>Period ${Number(c.period)} · ${esc(item.teacher)}</p></div><span class="pill blue">${esc(item.room)}</span></div><div class="day-agenda">${item.sessions.map(s=>`<div class="activity-row" style="--class-color:${esc(c.color)}"><div class="priority-number">?</div><div class="item-main"><strong>${esc(s.days)}</strong><small>${esc(s.time)} · ${esc(s.note)}</small></div><span class="pill green">Tutoring</span></div>`).join('')}</div><div class="privacy-note" style="margin-top:12px">Source: ${esc(item.source)}</div></div>`;}).join('');
+      const missing=data.classes.filter(c=>!c.isLunch&&normalize(c.name)!=='lunch'&&!covered.has(c.id));
+      return `<div class="student-banner"><div class="student-avatar ${childThemeClass(key)}">${CHILDREN[key].initial}</div><div><h3>${CHILDREN[key].name}</h3><p>${CHILDREN[key].grade} · ${esc(data.profile.school||CHILDREN[key].school)}</p></div>${connectionHTML(key,record)}</div><div class="grid two" style="margin-top:16px">${cards}</div><div class="card card-pad" style="margin-top:16px"><div class="card-title"><div><h3>No hours supplied yet</h3><p>These classes did not have an attached tutoring schedule.</p></div></div><div class="meta" style="display:flex;flex-wrap:wrap;gap:8px">${missing.length?missing.map(c=>`<span class="pill">P${Number(c.period)} · ${esc(c.name)}</span>`).join(''):'<span class="pill green">All class tutoring schedules supplied</span>'}</div><div class="privacy-note" style="margin-top:12px">Check with the teacher before attending. Tutoring schedules may change during the school year.</div></div>`;
+    }
+    function renderTutoring(){
+      document.getElementById('tutoring').innerHTML=`<div class="page-head"><div><h2>Tutoring Hours</h2><p>Choose a student to view the teacher support times provided in the attached syllabi.</p></div><button class="btn secondary" onclick="window.print()">Print</button></div><div class="student-tabs" role="tablist" aria-label="Student tutoring hours"><button class="${selectedTutoringChild==='noble'?'active':''}" data-parent-tutoring-child="noble" role="tab" aria-selected="${selectedTutoringChild==='noble'}">Noble · 8th Grade</button><button class="${selectedTutoringChild==='sky'?'active':''}" data-parent-tutoring-child="sky" role="tab" aria-selected="${selectedTutoringChild==='sky'}">Sky · 7th Grade</button><button class="${selectedTutoringChild==='lyric'?'active':''}" data-parent-tutoring-child="lyric" role="tab" aria-selected="${selectedTutoringChild==='lyric'}">Lyric · 10th Grade</button></div>${parentTutoringCard(selectedTutoringChild)}`;
+    }
     function renderChild(key){
       const record=readChild(key),data=record.data,missing=missingGradeItems({[key]:record}),overdue=overdueItems({[key]:record}),soon=dueSoon({[key]:record}),grades=[...data.grades].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
       document.getElementById(key).innerHTML=`<div class="page-head"><div><h2>${CHILDREN[key].name}’s planner</h2><p>${CHILDREN[key].grade} · ${esc(data.profile.school||CHILDREN[key].school)}</p></div><button class="btn secondary" data-import-one="${key}">Import ${CHILDREN[key].name} backup</button></div>
@@ -461,7 +491,7 @@
     }
     function toggle(name,title,help){return `<div class="toggle-row"><div><strong>${esc(title)}</strong><small>${esc(help)}</small></div><label class="switch"><input type="checkbox" data-setting="${name}" ${parent.settings[name]?'checked':''}><span></span></label></div>`;}
     function renderSettings(){document.getElementById('settings').innerHTML=`<div class="page-head"><div><h2>Parent dashboard settings</h2><p>Connections, alerts, accessibility, and backup</p></div></div><div class="grid two"><div class="stack"><div class="settings-section"><h3>Connect all three planners</h3><p class="privacy-note">Automatic monitoring works when all four GitHub Pages apps use the same <strong>adhayes1906-coder.github.io</strong> address and are opened in the same browser profile. For another device, download each student’s planner backup and import it here.</p><button class="btn wide" style="margin-top:12px" id="importBoth">Import planner backup files</button><div style="margin-top:14px">${Object.entries(datasets()).map(([key,r])=>`<div class="toggle-row"><div><strong>${CHILDREN[key].name}</strong><small>${r.source==='live'?'Automatic browser connection':r.source==='import'?'Imported backup snapshot':'No saved planner activity found'}</small></div>${connectionHTML(key,r)}</div>`).join('')}</div></div><div class="settings-section"><h3>Missing-grade rule</h3><label>School days before flagging<select id="alertThreshold">${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(parent.settings.alertThreshold)===n?'selected':''}>${n} school day${n===1?'':'s'}</option>`).join('')}</select></label><label style="margin-top:12px">No-school dates — one YYYY-MM-DD date per line<textarea id="noSchoolDates" placeholder="2026-09-07&#10;2026-11-23">${esc(parent.settings.noSchoolDates.join('\n'))}</textarea></label><button class="btn" style="margin-top:12px" id="saveAlertRule">Save alert rule</button></div></div><div class="stack"><div class="settings-section"><h3>Appearance & accessibility</h3>${toggle('dark','Dark mode','Use a darker screen in the evening.')}${toggle('largeText','Large text','Increase text and control sizes.')}${toggle('highContrast','High contrast','Use stronger borders and contrast.')}${toggle('dyslexia','Easy-read font','Use wider letter and word spacing.')}${toggle('reduced','Reduced-distraction layout','Hide optional visual extras.')}</div><div class="settings-section"><h3>Alerts & parent backup</h3><button class="btn wide" id="enableAlerts">Enable missing-grade alerts</button><button class="btn secondary wide" style="margin-top:9px" id="exportParent">Download parent dashboard backup</button><p class="privacy-note" style="margin:10px 0 0">Browser notifications are checked while this dashboard is open. The red dashboard flags stay visible until a grade is entered, even when browser notifications are off.</p></div></div></div>`;}
-    function renderAll(){renderOverview();renderParentCalendar();renderMissing();renderActivity();renderChild('noble');renderChild('sky');renderChild('lyric');renderSettings();const count=missingGradeItems().length,b=document.getElementById('navAlertCount');b.textContent=count;b.hidden=!count;bindDynamic();}
+    function renderAll(){renderOverview();renderParentCalendar();renderMissing();renderActivity();renderTutoring();renderChild('noble');renderChild('sky');renderChild('lyric');renderSettings();const count=missingGradeItems().length,b=document.getElementById('navAlertCount');b.textContent=count;b.hidden=!count;bindDynamic();}
     function showPage(page){activePage=page;document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===page));document.querySelectorAll('.nav button[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page));window.scrollTo({top:0,behavior:'smooth'});}
     function applySettings(){for(const k of ['dark','largeText','highContrast','dyslexia','reduced'])document.body.classList.toggle(k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase()),!!parent.settings[k]);document.getElementById('themeButton').textContent=parent.settings.dark?'☀':'☾';}
     function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3500);}
@@ -480,6 +510,7 @@
       document.querySelectorAll('[data-activity-filter]').forEach(b=>b.onclick=()=>{activityFilter=b.dataset.activityFilter;renderActivity();bindDynamic();});
       document.querySelectorAll('[data-parent-calendar-date]').forEach(b=>b.onclick=()=>{selectedParentDate=b.dataset.parentCalendarDate;parentCalendarCursor=parseDate(selectedParentDate);renderParentCalendar();bindDynamic();requestAnimationFrame(()=>document.getElementById('parentCalendarDetail')?.scrollIntoView({behavior:'smooth',block:'start'}));});
       document.querySelectorAll('[data-parent-calendar-child]').forEach(b=>b.onclick=()=>{selectedParentChild=b.dataset.parentCalendarChild;renderParentCalendar();bindDynamic();});
+      document.querySelectorAll('[data-parent-tutoring-child]').forEach(b=>b.onclick=()=>{selectedTutoringChild=b.dataset.parentTutoringChild;renderTutoring();bindDynamic();});
       document.querySelectorAll('[data-parent-calendar-nav]').forEach(b=>b.onclick=()=>{parentCalendarCursor=new Date(parentCalendarCursor.getFullYear(),parentCalendarCursor.getMonth()+Number(b.dataset.parentCalendarNav),1);renderParentCalendar();bindDynamic();});
       document.querySelectorAll('[data-parent-calendar-today]').forEach(b=>b.onclick=()=>{selectedParentDate=localISO();parentCalendarCursor=parseDate(selectedParentDate);renderParentCalendar();bindDynamic();});
       document.querySelectorAll('[data-import-one]').forEach(b=>b.onclick=()=>{const input=document.getElementById('importInput');input.dataset.forcedKey=b.dataset.importOne;input.click();});
