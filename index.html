@@ -238,7 +238,7 @@
     const SCHOOL_START='2026-08-10', SCHOOL_END='2027-05-26';
     const CHILDREN={
       noble:{name:'Noble',initial:'N',grade:'8th Grade',school:'Rawlinson Middle School',storageKey:'noble-school-planner-v1',classes:[
-        {id:'pe',period:1,name:'PE 8 / Athletics (Boys)',room:'E101',teacher:'Diaz',start:'08:35',end:'09:20',color:'#2f6fed',goal:85,weights:{homework:20,quiz:20,test:35,project:25}},
+        {id:'pe',period:1,name:'PE 8 / Athletics (Boys)',room:'E101',teacher:'Diaz',start:'08:35',end:'09:20',color:'#2f6fed',goal:85,weights:{formative:50,summative:50},gradingPolicy:{type:'formative-summative',formative:50,summative:50,source:'Rawlinson Boys Athletics syllabus'}},
         {id:'history',period:2,name:'Advanced U.S. History 8',room:'C217',teacher:'Lopez',start:'09:24',end:'10:14',color:'#b65b19',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
         {id:'spanish',period:3,name:'Spanish I MS',room:'B109',teacher:'Medina',start:'10:18',end:'11:03',color:'#8c4bc0',goal:90,weights:{formative:50,summative:50},gradingPolicy:{type:'formative-summative',formative:50,summative:50,source:'Lydia Medina Spanish 1 syllabus'}},
         {id:'avid',period:4,name:'AVID A HS',room:'B204',teacher:'Reyes',start:'11:07',end:'11:52',color:'#cf3b67',goal:90,weights:{formative:50,summative:50},gradingPolicy:{type:'formative-summative',formative:50,summative:50,semesterExam:10,source:'Coach Reyes AVID 1 syllabus'}},
@@ -255,7 +255,7 @@
         {id:'ela5',period:5,name:'Advanced ELA 7',room:'C221',teacher:'Leigh-Gomez',start:'12:30',end:'13:25',color:'#cf3b67',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
         {id:'history',period:6,name:'Advanced Texas History 7',room:'C213',teacher:'Canter',start:'13:29',end:'14:14',color:'#008a9a',goal:90,weights:{homework:20,quiz:20,test:35,project:25}},
         {id:'math',period:7,name:'Advanced Math 7',room:'B210',teacher:'Pisano',start:'14:18',end:'15:03',color:'#d58a00',goal:90,weights:{formative:40,summative:60},gradingPolicy:{type:'formative-summative',formative:40,summative:60,source:'Ms. Pisano 7th Grade Advanced Math syllabus'}},
-        {id:'pe',period:8,name:'PE 7 / Athletics (Boys)',room:'E101',teacher:'Diaz',start:'15:07',end:'15:55',color:'#a62126',goal:85,weights:{homework:20,quiz:20,test:35,project:25}}
+        {id:'pe',period:8,name:'PE 7 / Athletics (Boys)',room:'E101',teacher:'Diaz',start:'15:07',end:'15:55',color:'#a62126',goal:85,weights:{formative:50,summative:50},gradingPolicy:{type:'formative-summative',formative:50,summative:50,source:'Rawlinson Boys Athletics syllabus'}}
       ]},
       lyric:{name:'Lyric',initial:'L',grade:'10th Grade',school:'Clark High School',storageKey:'lyric-school-planner-v1',classes:[
         {id:'algebra2',period:1,name:'Algebra 2',room:'C110',teacher:'Rubio, Deborah',start:'09:00',end:'09:50',earlyStart:'09:00',earlyEnd:'09:25',color:'#2f6fed',goal:90,weights:{formative:40,summative:60},gradingPolicy:{type:'formative-summative',formative:40,summative:60,semesterExam:10,source:'Deborah Rubio Algebra 2 syllabus'}},
@@ -343,8 +343,8 @@
     function clone(v){return JSON.parse(JSON.stringify(v));}
     function applyKnownGradingPolicies(key,classes=[]){
       const list=Array.isArray(classes)?clone(classes):clone(CHILDREN[key].classes),setPolicy=(id,formative,summative,source,semesterExam=0)=>{const c=list.find(x=>x.id===id);if(c){c.weights={formative,summative};c.gradingPolicy={type:'formative-summative',formative,summative,source,...(semesterExam?{semesterExam}:{})};}};
-      if(key==='noble'){setPolicy('avid',50,50,'Coach Reyes AVID 1 syllabus',10);setPolicy('spanish',50,50,'Lydia Medina Spanish 1 syllabus');}
-      if(key==='sky'){setPolicy('math',40,60,'Ms. Pisano 7th Grade Advanced Math syllabus');setPolicy('band',50,50,'Rawlinson Band syllabus');}
+      if(key==='noble'){setPolicy('avid',50,50,'Coach Reyes AVID 1 syllabus',10);setPolicy('spanish',50,50,'Lydia Medina Spanish 1 syllabus');setPolicy('pe',50,50,'Rawlinson Boys Athletics syllabus');}
+      if(key==='sky'){setPolicy('math',40,60,'Ms. Pisano 7th Grade Advanced Math syllabus');setPolicy('band',50,50,'Rawlinson Band syllabus');setPolicy('pe',50,50,'Rawlinson Boys Athletics syllabus');}
       if(key==='lyric')setPolicy('algebra2',40,60,'Deborah Rubio Algebra 2 syllabus',10);
       return list;
     }
