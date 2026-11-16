@@ -236,6 +236,8 @@
     'use strict';
     const PARENT_KEY='hayes-parent-school-dashboard-v1';
     const SCHOOL_START='2026-08-10', SCHOOL_END='2027-05-26';
+    const LYRIC_CLASS_SCHEDULE_VERSION='clark-history-white-2026-v1';
+    const TUTORING_SOURCE='26–27 Clark Tutoring Schedule';
     const CHILDREN={
       noble:{name:'Noble',initial:'N',grade:'8th Grade',school:'Rawlinson Middle School',storageKey:'noble-school-planner-v1',classes:[
         {id:'pe',period:1,name:'PE 8 / Athletics (Boys)',room:'E101',teacher:'Diaz',start:'08:35',end:'09:20',color:'#2f6fed',goal:85,weights:{formative:50,summative:50},gradingPolicy:{type:'formative-summative',formative:50,summative:50,source:'Rawlinson Boys Athletics syllabus'}},
@@ -278,10 +280,35 @@
         {classId:'math',teacher:'Ms. Isabel Pisano',room:'B210',source:'7th Grade Advanced Math syllabus',sessions:[{days:'Tuesday & Thursday',time:'7:50–8:30 AM',note:'Morning tutoring'}]}
       ],
       lyric:[
-        {classId:'algebra2',teacher:'Deborah Rubio (Lyric’s teacher)',room:'C110',source:'Deborah Rubio Algebra 2 syllabus',sessions:[{days:'Tuesday',time:'8:15–8:45 AM',note:'Morning tutoring'},{days:'Thursday',time:'4:20–4:50 PM',note:'After-school tutoring'}]},
-        {classId:'algebra2',teacher:'Johnson',room:'C215',source:'Algebra 2 tutoring team',sessions:[{days:'Tuesday',time:'8:15–8:45 AM',note:'Morning tutoring'},{days:'Wednesday',time:'4:20–4:50 PM',note:'After-school tutoring'}]},
-        {classId:'algebra2',teacher:'Nicholson',room:'C217',source:'Algebra 2 tutoring team',sessions:[{days:'Monday & Thursday',time:'4:20–4:50 PM',note:'After-school tutoring'}]},
-        {classId:'algebra2',teacher:'Pedroza',room:'C218',source:'Algebra 2 tutoring team',sessions:[{days:'Tuesday & Wednesday',time:'4:20–4:50 PM',note:'After-school tutoring'}]}
+        {classId:'algebra2',teacher:'Deborah Rubio (Lyric’s teacher)',room:'C110',source:TUTORING_SOURCE,sessions:[
+          {days:'Tuesday',time:'8:20–8:50 AM',note:'Morning tutoring'},
+          {days:'Thursday',time:'4:20–4:50 PM',note:'After-school tutoring'}
+        ]},
+        {classId:'spanish2',teacher:'Xiomara Granado (Lyric’s teacher)',room:'A105',source:TUTORING_SOURCE,sessions:[
+          {days:'Wednesday & Thursday',time:'8:20–8:50 AM',note:'Morning tutoring'}
+        ]},
+        {classId:'worldhistory',teacher:'Karla White (Lyric’s teacher)',room:'A211',source:TUTORING_SOURCE,sessions:[
+          {days:'Monday & Wednesday',time:'4:20–4:50 PM',note:'After-school tutoring'}
+        ]},
+        {classId:'avtech',teacher:'Lesley Reyes (Lyric’s teacher)',room:'C204',source:TUTORING_SOURCE,sessions:[
+          {days:'Tuesday & Thursday',time:'8:20–8:50 AM',note:'Morning tutoring'}
+        ]},
+        {classId:'english2',teacher:'Crystal Jones (Lyric’s teacher)',room:'A209',source:TUTORING_SOURCE,sessions:[
+          {days:'Wednesday',time:'4:20–4:50 PM',note:'After-school tutoring'},
+          {days:'Friday',time:'8:20–8:50 AM',note:'Morning tutoring'}
+        ]},
+        {classId:'chemistry1',teacher:'Selene Tovar (Lyric’s teacher)',room:'A049',source:TUTORING_SOURCE,sessions:[
+          {days:'Tuesday & Thursday',time:'4:20–4:50 PM',note:'After-school tutoring'}
+        ]},
+        {classId:'algebra2',teacher:'Johnson (Algebra 2 tutoring team)',room:'C215',source:TUTORING_SOURCE,sessions:[
+          {days:'Tuesday & Wednesday',time:'8:20–8:50 AM',note:'Morning tutoring'}
+        ]},
+        {classId:'algebra2',teacher:'Nicholson (Algebra 2 tutoring team)',room:'C217',source:TUTORING_SOURCE,sessions:[
+          {days:'Monday & Thursday',time:'4:20–4:50 PM',note:'After-school tutoring'}
+        ]},
+        {classId:'algebra2',teacher:'Pedroza (Algebra 2 tutoring team)',room:'C218',source:TUTORING_SOURCE,sessions:[
+          {days:'Tuesday & Wednesday',time:'4:20–4:50 PM',note:'After-school tutoring'}
+        ]}
       ]
     };
     const NOBLE_FOOTBALL_EVENTS = [
@@ -365,7 +392,7 @@
     function uid(p='id'){return `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`;}
     function normalize(v=''){return String(v).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
     function validPlanner(x){return !!x&&Array.isArray(x.classes)&&Array.isArray(x.assignments)&&Array.isArray(x.grades||[]);}
-    function defaultChild(key){const c=CHILDREN[key],isLyric=key==='lyric',events=withNobleFootball(key,[{id:'first-day',title:`First day of ${c.grade.toLowerCase()}`,type:'school',date:SCHOOL_START,time:isLyric?'09:00':'08:30',recurrence:'none',notes:c.school},{id:'last-day',title:'Last day of school',type:'school',date:SCHOOL_END,time:isLyric?'16:20':'15:55',recurrence:'none',notes:'Finish strong!'}]);return {profile:{name:c.name,grade:c.grade,school:c.school},school:{start:SCHOOL_START,end:SCHOOL_END},classes:clone(c.classes),assignments:[],events,grades:[],studySessions:[],routineLog:{},habitLog:{}};}
+    function defaultChild(key){const c=CHILDREN[key],isLyric=key==='lyric',events=withNobleFootball(key,[{id:'first-day',title:`First day of ${c.grade.toLowerCase()}`,type:'school',date:SCHOOL_START,time:isLyric?'09:00':'08:30',recurrence:'none',notes:c.school},{id:'last-day',title:'Last day of school',type:'school',date:SCHOOL_END,time:isLyric?'16:20':'15:55',recurrence:'none',notes:'Finish strong!'}]);return {profile:{name:c.name,grade:c.grade,school:c.school},school:{start:SCHOOL_START,end:SCHOOL_END},classes:clone(c.classes),...(isLyric?{classScheduleVersion:LYRIC_CLASS_SCHEDULE_VERSION}:{}),assignments:[],events,grades:[],studySessions:[],routineLog:{},habitLog:{}};}
     function readChild(key){
       const info=CHILDREN[key];
       try{const live=JSON.parse(localStorage.getItem(info.storageKey));if(validPlanner(live))return {data:mergeChild(key,live),source:'live',updated:'Saved in this browser'};}catch(e){}
@@ -373,7 +400,14 @@
       if(imported&&validPlanner(imported.data))return {data:mergeChild(key,imported.data),source:'import',updated:imported.importedAt};
       return {data:defaultChild(key),source:'default',updated:''};
     }
-    function mergeChild(key,data){const base=defaultChild(key);return {...base,...data,profile:{...base.profile,...(data.profile||{})},school:{...base.school,...(data.school||{})},classes:applyKnownGradingPolicies(key,Array.isArray(data.classes)&&data.classes.length?data.classes:base.classes),assignments:Array.isArray(data.assignments)?data.assignments:[],events:withNobleFootball(key,Array.isArray(data.events)?data.events:base.events),grades:Array.isArray(data.grades)?data.grades:[],studySessions:Array.isArray(data.studySessions)?data.studySessions:[],routineLog:data.routineLog||{},habitLog:data.habitLog||{}};}
+    function mergeChild(key,data){const base=defaultChild(key);return {...base,...data,profile:{...base.profile,...(data.profile||{})},school:{...base.school,...(data.school||{})},classes:applyKnownClassSchedule(key,applyKnownGradingPolicies(key,Array.isArray(data.classes)&&data.classes.length?data.classes:base.classes),data.classScheduleVersion),...(key==='lyric'?{classScheduleVersion:LYRIC_CLASS_SCHEDULE_VERSION}:{}),assignments:Array.isArray(data.assignments)?data.assignments:[],events:withNobleFootball(key,Array.isArray(data.events)?data.events:base.events),grades:Array.isArray(data.grades)?data.grades:[],studySessions:Array.isArray(data.studySessions)?data.studySessions:[],routineLog:data.routineLog||{},habitLog:data.habitLog||{}};}
+    function applyKnownClassSchedule(key,classes,version){
+      if(key==='lyric'&&version!==LYRIC_CLASS_SCHEDULE_VERSION){
+        const history=classes.find(c=>c.id==='worldhistory');
+        if(history)history.teacher='White, Karla';
+      }
+      return classes;
+    }
     function datasets(){return Object.fromEntries(Object.keys(CHILDREN).map(k=>[k,readChild(k)]));}
     function childClass(data,id){return data.classes.find(c=>c.id===id)||{name:'General',color:'#667085',teacher:'',room:'',goal:90,weights:{homework:20,quiz:20,test:35,project:25}};}
     function childThemeClass(key){return key==='sky'?'sky':key==='lyric'?'lyric':'';}
@@ -476,10 +510,10 @@
       const record=readChild(key),data=record.data,hours=TUTORING_HOURS[key]||[],covered=new Set(hours.map(x=>x.classId));
       const cards=hours.map(item=>{const c=childClass(data,item.classId);return `<div class="card card-pad" style="border-top:5px solid ${esc(c.color)}"><div class="card-title"><div><h3>${esc(c.name)}</h3><p>Period ${Number(c.period)} · ${esc(item.teacher)}</p></div><span class="pill blue">${esc(item.room)}</span></div><div class="day-agenda">${item.sessions.map(s=>`<div class="activity-row" style="--class-color:${esc(c.color)}"><div class="priority-number">?</div><div class="item-main"><strong>${esc(s.days)}</strong><small>${esc(s.time)} · ${esc(s.note)}</small></div><span class="pill green">Tutoring</span></div>`).join('')}</div><div class="privacy-note" style="margin-top:12px">Source: ${esc(item.source)}</div></div>`;}).join('');
       const missing=data.classes.filter(c=>!c.isLunch&&normalize(c.name)!=='lunch'&&!covered.has(c.id));
-      return `<div class="student-banner"><div class="student-avatar ${childThemeClass(key)}">${CHILDREN[key].initial}</div><div><h3>${CHILDREN[key].name}</h3><p>${CHILDREN[key].grade} · ${esc(data.profile.school||CHILDREN[key].school)}</p></div>${connectionHTML(key,record)}</div><div class="grid two" style="margin-top:16px">${cards}</div><div class="card card-pad" style="margin-top:16px"><div class="card-title"><div><h3>No hours supplied yet</h3><p>These classes did not have an attached tutoring schedule.</p></div></div><div class="meta" style="display:flex;flex-wrap:wrap;gap:8px">${missing.length?missing.map(c=>`<span class="pill">P${Number(c.period)} · ${esc(c.name)}</span>`).join(''):'<span class="pill green">All class tutoring schedules supplied</span>'}</div><div class="privacy-note" style="margin-top:12px">Check with the teacher before attending. Tutoring schedules may change during the school year.</div></div>`;
+      return `<div class="student-banner"><div class="student-avatar ${childThemeClass(key)}">${CHILDREN[key].initial}</div><div><h3>${CHILDREN[key].name}</h3><p>${CHILDREN[key].grade} · ${esc(data.profile.school||CHILDREN[key].school)}</p></div>${connectionHTML(key,record)}</div><div class="grid two" style="margin-top:16px">${cards}</div><div class="card card-pad" style="margin-top:16px"><div class="card-title"><div><h3>${key==='lyric'?'Hours not listed':'No hours supplied yet'}</h3><p>${key==='lyric'?'The supplied Clark tutoring schedule does not list hours for these classes. Ask the teacher for availability.':'These classes did not have an attached tutoring schedule.'}</p></div></div><div class="meta" style="display:flex;flex-wrap:wrap;gap:8px">${missing.length?missing.map(c=>`<span class="pill">P${Number(c.period)} · ${esc(c.name)}${key==='lyric'?' · '+esc(c.teacher):''}</span>`).join(''):'<span class="pill green">All class tutoring schedules supplied</span>'}</div><div class="privacy-note" style="margin-top:12px">Check with the teacher before attending. Tutoring schedules may change during the school year.</div></div>`;
     }
     function renderTutoring(){
-      document.getElementById('tutoring').innerHTML=`<div class="page-head"><div><h2>Tutoring Hours</h2><p>Choose a student to view the teacher support times provided in the attached syllabi.</p></div><button class="btn secondary" onclick="window.print()">Print</button></div><div class="student-tabs" role="tablist" aria-label="Student tutoring hours"><button class="${selectedTutoringChild==='noble'?'active':''}" data-parent-tutoring-child="noble" role="tab" aria-selected="${selectedTutoringChild==='noble'}">Noble · 8th Grade</button><button class="${selectedTutoringChild==='sky'?'active':''}" data-parent-tutoring-child="sky" role="tab" aria-selected="${selectedTutoringChild==='sky'}">Sky · 7th Grade</button><button class="${selectedTutoringChild==='lyric'?'active':''}" data-parent-tutoring-child="lyric" role="tab" aria-selected="${selectedTutoringChild==='lyric'}">Lyric · 10th Grade</button></div>${parentTutoringCard(selectedTutoringChild)}`;
+      document.getElementById('tutoring').innerHTML=`<div class="page-head"><div><h2>Tutoring Hours</h2><p>Choose a student to view teacher support times from the supplied syllabi and school tutoring schedules.</p></div><button class="btn secondary" onclick="window.print()">Print</button></div><div class="student-tabs" role="tablist" aria-label="Student tutoring hours"><button class="${selectedTutoringChild==='noble'?'active':''}" data-parent-tutoring-child="noble" role="tab" aria-selected="${selectedTutoringChild==='noble'}">Noble · 8th Grade</button><button class="${selectedTutoringChild==='sky'?'active':''}" data-parent-tutoring-child="sky" role="tab" aria-selected="${selectedTutoringChild==='sky'}">Sky · 7th Grade</button><button class="${selectedTutoringChild==='lyric'?'active':''}" data-parent-tutoring-child="lyric" role="tab" aria-selected="${selectedTutoringChild==='lyric'}">Lyric · 10th Grade</button></div>${parentTutoringCard(selectedTutoringChild)}`;
     }
     function renderChild(key){
       const record=readChild(key),data=record.data,missing=missingGradeItems({[key]:record}),overdue=overdueItems({[key]:record}),soon=dueSoon({[key]:record}),grades=[...data.grades].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
