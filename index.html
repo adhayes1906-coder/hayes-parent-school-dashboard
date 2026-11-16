@@ -197,6 +197,8 @@
     .grade-attention-grid summary { cursor:pointer; font-weight:800; line-height:1.5; }
     .grade-attention-grid .student-banner { align-items:flex-start; }
     @media(max-width:1000px) { .grade-attention-grid { grid-template-columns:1fr; } }
+  
+    .grade-class-label{display:block;margin:0 0 9px;padding:8px 10px;border-radius:8px;background:var(--soft);color:var(--ink);font-size:.82rem;font-weight:800;line-height:1.4;overflow-wrap:anywhere}
   </style>
 </head>
 <body>
@@ -521,9 +523,10 @@
       return Object.keys(dataMap).flatMap(key=>hacFindings(parent.gradeReview,key)).filter(x=>x.kind!=='ungraded').map(x=>({...x,resolved:!!parent.resolvedAttention?.[x.id]})).filter(x=>includeResolved||!x.resolved);
     }
     function attentionRow(item){
+      const course=readChild(item.key).data.classes.find(c=>c.id===item.classId),className=course?.name||item.course||'Class not supplied';
       const label=item.kind==='average'?`Low · Course average ${item.percent.toFixed(1)}%`:item.kind==='low'?`Low · ${Number(item.score)}/${Number(item.max)} · ${item.percent.toFixed(1)}%`:item.kind==='missing'?'Missing':'Blank';
       const sourceUrl='https://hac.nisd.net/HomeAccess/Classes/Classwork';
-      return `<article class="grade-attention-item" style="border-left-color:${childAccent(item.key)}"><strong>${esc(item.title)}</strong><small>${esc(item.course)}</small><div class="meta"><span class="pill ${item.resolved?'green':item.kind==='ungraded'?'gold':'red'}">${item.resolved?'Resolved · ':''}${esc(label)}</span></div><small>${item.dueDate?`Due ${esc(fmt(item.dueDate))} · `:''}${esc(item.source)}${item.observedAt?` · checked ${esc(fmt(String(item.observedAt).slice(0,10)))}`:''}</small>${item.kind==='ungraded'?'<small>No score is recorded. This does not confirm the assignment is missing.</small>':''}<div class="grade-attention-actions">${sourceUrl?`<a href="${esc(sourceUrl)}" target="_blank" rel="noopener">View source ↗</a>`:''}<button class="btn small secondary" data-resolve-attention="${esc(item.id)}">${item.resolved?'Reopen':'Resolve'}</button></div></article>`;
+      return `<article class="grade-attention-item" style="border-left-color:${esc(course?.color||childAccent(item.key))}"><div class="grade-class-label">Class: ${esc(className)}</div><strong>${esc(item.title)}</strong><div class="meta"><span class="pill ${item.resolved?'green':item.kind==='ungraded'?'gold':'red'}">${item.resolved?'Resolved · ':''}${esc(label)}</span></div><small>${item.dueDate?`Due ${esc(fmt(item.dueDate))} · `:''}${esc(item.source)}${item.observedAt?` · checked ${esc(fmt(String(item.observedAt).slice(0,10)))}`:''}</small>${item.kind==='ungraded'?'<small>No score is recorded. This does not confirm the assignment is missing.</small>':''}<div class="grade-attention-actions">${sourceUrl?`<a href="${esc(sourceUrl)}" target="_blank" rel="noopener">View source ↗</a>`:''}<button class="btn small secondary" data-resolve-attention="${esc(item.id)}">${item.resolved?'Reopen':'Resolve'}</button></div></article>`;
     }
     function attentionSection(dataMap=datasets(),onlyChild=''){
       const items=gradeAttentionItems(dataMap,showResolvedAttention),all=gradeAttentionItems(dataMap,true),active=all.filter(x=>!x.resolved),resolved=all.length-active.length,keys=onlyChild?[onlyChild]:Object.keys(dataMap),review=parent.gradeReview;
